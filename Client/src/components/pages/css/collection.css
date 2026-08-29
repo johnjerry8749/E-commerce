@@ -1,0 +1,528 @@
+
+        /* =====================================================
+           GENERAL
+        ===================================================== */
+
+        .collections-page {
+          background: #fff;
+          min-height: 100vh;
+        }
+
+
+        /* =====================================================
+           FILTER
+        ===================================================== */
+
+        .large-filter {
+          padding-top: 55px;
+        }
+
+        .large-filter h2,
+        .mobile-filter-header h2 {
+          font-family: 'Lora', serif;
+          font-weight: 400;
+          color: #111;
+        }
+
+        .large-filter h2 {
+          font-size: 30px;
+          margin-bottom: 38px;
+        }
+
+        .mobile-filter-header {
+          cursor: pointer;
+          user-select: none;
+        }
+
+        .mobile-filter-header h2 {
+          font-size: 24px;
+          margin: 0;
+        }
+
+        .mobile-filter-header i {
+          font-size: 21px;
+          color: #777;
+        }
+
+
+        /* =====================================================
+           FILTER BOX
+        ===================================================== */
+
+        .filter-box {
+          border: 1px solid #cfd2d6;
+          padding: 22px 30px;
+          background: #fff;
+        }
+
+        .filter-box + .filter-box {
+          margin-top: 30px;
+        }
+
+        .filter-box h3 {
+          font-family: Arial, sans-serif;
+          font-size: 20px;
+          font-weight: 500;
+          color: #111;
+          margin: 0 0 24px;
+        }
+
+        .filter-box label {
+          display: flex;
+          align-items: center;
+          gap: 13px;
+          margin-bottom: 19px;
+          cursor: pointer;
+        }
+
+        .filter-box label:last-child {
+          margin-bottom: 0;
+        }
+
+
+        /* =====================================================
+           CUSTOM CHECKBOX
+        ===================================================== */
+
+        .filter-box input[type="checkbox"] {
+          appearance: none;
+          -webkit-appearance: none;
+
+          width: 18px;
+          height: 18px;
+
+          border: 1.5px solid #777;
+          border-radius: 3px;
+
+          background: #fff;
+
+          cursor: pointer;
+          position: relative;
+          flex-shrink: 0;
+        }
+
+        .filter-box input[type="checkbox"]:checked {
+          background: #111;
+          border-color: #111;
+        }
+
+        .filter-box input[type="checkbox"]:checked::after {
+          content: "✓";
+
+          position: absolute;
+
+          color: #fff;
+
+          font-size: 13px;
+
+          left: 3px;
+          top: -1px;
+        }
+
+        .filter-box label span {
+          font-size: 20px;
+          font-weight: 400;
+          color: #243b63;
+        }
+
+
+        /* =====================================================
+           MOBILE FILTER ANIMATION
+        ===================================================== */
+
+        .mobile-filter-wrapper {
+          overflow: hidden;
+          transition:
+            max-height 0.3s ease,
+            opacity 0.25s ease;
+        }
+
+        .filter-visible {
+          max-height: 800px;
+          opacity: 1;
+        }
+
+        .filter-hidden {
+          max-height: 0;
+          opacity: 0;
+          margin: 0;
+        }
+
+
+        /* =====================================================
+           COLLECTION HEADER
+        ===================================================== */
+
+        .mobile-collection-header,
+        .desktop-collection-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 20px;
+        }
+
+        .mobile-collection-header {
+          margin-bottom: 10px;
+        }
+
+        .desktop-collection-header {
+          padding-bottom: 18px;
+          border-bottom: 1px solid #ddd;
+        }
+
+
+        /* =====================================================
+           COLLECTION TITLE
+        ===================================================== */
+
+        .collection-heading {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 14px;
+        }
+
+        .collection-heading h1 {
+          font-family: 'Lora', serif;
+          font-weight: 400;
+          color: #1a1a1a;
+          margin: 0;
+          white-space: nowrap;
+        }
+
+        .collection-heading h1 span {
+          color: #777;
+        }
+
+        .mobile-collection-header .collection-heading h1 {
+          font-size: 23px;
+        }
+
+        .desktop-heading {
+          flex: 1;
+        }
+
+        .desktop-heading h1 {
+          font-size: 50px;
+        }
+
+        .heading-line {
+          width: 45px;
+          height: 1px;
+          background: #1a1a1a;
+          flex-shrink: 0;
+        }
+
+
+        /* =====================================================
+           SORT
+        ===================================================== */
+
+        .sort-wrapper {
+          position: relative;
+          flex-shrink: 0;
+        }
+
+        .sort-button {
+          min-width: 220px;
+
+          border: 1px solid #cfd2d6;
+
+          padding: 10px 14px;
+
+          display: flex;
+          align-items: center;
+          gap: 8px;
+
+          background: #fff;
+
+          cursor: pointer;
+
+          transition: all 0.2s ease;
+        }
+
+        .sort-button:hover {
+          border-color: #111;
+        }
+
+        .sort-button span {
+          color: #777;
+          font-size: 15px;
+        }
+
+        .sort-button strong {
+          color: #111;
+          font-size: 15px;
+          font-weight: 600;
+          white-space: nowrap;
+        }
+
+        .sort-button i {
+          margin-left: auto;
+          font-size: 18px;
+        }
+
+        .sort-dropdown {
+          position: absolute;
+
+          top: calc(100% + 7px);
+          left: 0;
+
+          width: 100%;
+
+          background: #fff;
+
+          border: 1px solid #111;
+
+          box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+
+          z-index: 1000;
+
+          overflow: hidden;
+        }
+
+        .sort-option {
+          padding: 11px 13px;
+
+          cursor: pointer;
+
+          font-size: 15px;
+
+          transition:
+            background 0.2s ease,
+            color 0.2s ease;
+        }
+
+        .sort-option:hover,
+        .active-sort {
+          background: #111;
+          color: #fff;
+        }
+
+
+        /* =====================================================
+           PRODUCT CARD
+        ===================================================== */
+
+        .product-card {
+          height: 100%;
+
+          background: #fff;
+
+          cursor: pointer;
+
+          transition:
+            transform 0.3s ease,
+            box-shadow 0.3s ease;
+        }
+
+        .product-card:hover {
+          transform: translateY(-5px);
+        }
+
+        .product-image-wrapper {
+          width: 100%;
+
+          height: 320px;
+
+          overflow: hidden;
+
+          background: #f7f7f7;
+        }
+
+        .product-image {
+          width: 100%;
+          height: 100%;
+
+          object-fit: cover;
+
+          display: block;
+
+          transition: transform 0.5s ease;
+        }
+
+        .product-card:hover .product-image {
+          transform: scale(1.05);
+        }
+
+        .product-info {
+          padding: 14px 4px 8px;
+        }
+
+        .product-name {
+          margin: 0 0 6px;
+
+          color: #222;
+
+          font-size: 16px;
+
+          font-weight: 500;
+        }
+
+        .product-price {
+          margin: 0;
+
+          color: #111;
+
+          font-size: 16px;
+
+          font-weight: 700;
+        }
+
+
+        /* =====================================================
+           TABLET
+        ===================================================== */
+
+        @media (min-width: 768px) and (max-width: 991px) {
+
+          .mobile-filter-wrapper .filter-box {
+            padding: 25px 30px;
+          }
+
+          .product-image-wrapper {
+            height: 300px;
+          }
+
+          .mobile-collection-header {
+            gap: 15px;
+          }
+
+          .sort-button {
+            min-width: 210px;
+          }
+
+        }
+
+
+        /* =====================================================
+           MOBILE
+        ===================================================== */
+
+        @media (max-width: 767px) {
+
+          .mobile-collection-header {
+            align-items: flex-end;
+            gap: 12px;
+          }
+
+          .collection-heading {
+            gap: 8px;
+          }
+
+          .mobile-collection-header .collection-heading h1 {
+            font-size: 20px;
+          }
+
+          .mobile-collection-header .heading-line {
+            width: 30px;
+          }
+
+          .sort-button {
+            min-width: 165px;
+            padding: 9px 10px;
+          }
+
+          .sort-button span,
+          .sort-button strong {
+            font-size: 13px;
+          }
+
+          .product-image-wrapper {
+            height: 240px;
+          }
+
+          .product-name,
+          .product-price {
+            font-size: 14px;
+          }
+
+          .filter-box {
+            padding: 20px;
+          }
+
+          .filter-box h3 {
+            font-size: 18px;
+          }
+
+          .filter-box label span {
+            font-size: 17px;
+          }
+
+        }
+
+
+        /* =====================================================
+           SMALL MOBILE
+        ===================================================== */
+
+        @media (max-width: 575px) {
+
+          .mobile-collection-header {
+            align-items: center;
+          }
+
+          .mobile-collection-header .collection-heading h1 {
+            font-size: 18px;
+          }
+
+          .mobile-collection-header .heading-line {
+            display: none;
+          }
+
+          .sort-button {
+            min-width: 145px;
+          }
+
+          .sort-button span {
+            display: none;
+          }
+
+          .sort-button strong {
+            font-size: 12px;
+          }
+
+          .sort-button i {
+            font-size: 15px;
+          }
+
+          .product-image-wrapper {
+            height: 210px;
+          }
+
+          .product-info {
+            padding-top: 10px;
+          }
+
+          .product-name {
+            font-size: 13px;
+          }
+
+          .product-price {
+            font-size: 14px;
+          }
+
+        }
+
+
+        /* =====================================================
+           EXTRA SMALL
+        ===================================================== */
+
+        @media (max-width: 400px) {
+
+          .mobile-collection-header .collection-heading h1 {
+            font-size: 16px;
+          }
+
+          .sort-button {
+            min-width: 130px;
+          }
+
+          .product-image-wrapper {
+            height: 180px;
+          }
+
+        }
+
+      
