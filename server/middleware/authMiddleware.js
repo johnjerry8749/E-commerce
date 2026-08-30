@@ -1,26 +1,27 @@
-import { body } from "express-validator";
+import jwt from "jsonwebtoken"
 
-
-export const registerValidator = [
-    body("name")
-    .trim()
-    .notEmpty()
-    .withMessage("Name is Required")
-    .isLength({min: 3})
-    .withMessage("Name must be at least 3 characters"),
-
-    body("email")
-    .trim()
-    .notEmpty()
-    .withMessage("Email is Required")
-    .isLength({min: 3})
-    .withMessage("Email must be a Valid Email"),
-
-     body("password")
-    .trim()
-    .notEmpty()
-    .withMessage("Password is Required")
-    .isLength({min: 3})
-    .withMessage(" must be at least 4 characters")
-
-]
+export const protect = (req, res, next) => {
+    try {
+        let token;
+        if(
+            req.headers.authorization && 
+            req.headers.authorization.startsWith("Bearer")
+        ){token = req.header.authorization.split(" ")[1];
+        }
+        if(!token){
+            return res.status(401).json({
+                success: false,
+                message:"Not Authorizes, No Token",
+            });
+        }
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = {id: decoded.id};
+        next();
+    } catch (error) {
+        return res.status(401).json({
+            success: false,
+            message: "Not Authorized Toekn failed"
+        });
+        
+    }
+};
