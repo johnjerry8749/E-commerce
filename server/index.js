@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import dotenv from 'dotenv';
 import './config/db.js';
+import routes from './routes/index.js';
 
 dotenv.config();
 
@@ -27,9 +28,7 @@ app.use(session({
   cookie: { secure: false } // Set to true if using HTTPS
 }));
 
-app.get('/', (req, res) => {
-  res.send('Hello, World!');
-});
+app.use("/api", routes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
