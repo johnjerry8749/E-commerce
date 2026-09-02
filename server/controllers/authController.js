@@ -103,3 +103,60 @@ export const login = async (req, res) => {
     });
   }
 };
+
+
+
+// =========================
+// ADMIN LOGIN
+// =========================
+export const adminLogin = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    
+    console.log("Admin Login Attempt:", email);  // ← Add this
+
+    const user = await Loginuser(email);
+    console.log("👤 User Found:", user ? "Yes" : "No");  // ← Add this
+    
+    if (!user) {
+      console.log(" User not found");  // ← Add this
+      return res.status(401).json({
+        success: false,
+        message: "Invalid email or password",
+      });
+    }
+
+    if (user.role !== "admin") {
+      console.log("User is not admin, role:", user.role);  // ← Add this
+      return res.status(403).json({
+        success: false,
+        message: "You are not authorized to access admin panel",
+      });
+    }
+
+    const passwordMatch = await comparePassword(password, user.password);
+    console.log(" Password Match:", passwordMatch);  // ← Add this
+    
+    if (!passwordMatch) {
+      console.log(" Password mismatch");  // ← Add this
+      return res.status(401).json({
+        success: false,
+        message: "Invalid email or password",
+      });
+    }
+
+    const token = await generateToken(user);
+    return res.status(200).json({
+      success: true,
+      message: "Admin login successful",
+      token,
+      user: { id: user.id, name: user.name, email: user.email, role: user.role },
+    });
+  } catch (error) {
+    console.error("Admin Login Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
