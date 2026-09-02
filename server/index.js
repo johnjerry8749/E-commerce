@@ -54,6 +54,13 @@ app.use(
 // API ROUTES
 // ========================================
 
+app.get("/", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "E-commerce API is running",
+  });
+});
+
 app.use("/api", routes);
 
 // ========================================
