@@ -1,31 +1,26 @@
 import { Router } from "express";
 import { protect } from "../middleware/authMiddleware.js";
-import { adminOnly } from "../middleware/adminMiddleware";
+import { adminOnly } from "../middleware/adminMiddleware.js";
+
 import {
   createProduct,
-  getProduct,
   getProducts,
+  getProduct,
   updateProduct,
   deleteProduct,
   getBestSellers,
 } from "../controllers/productController.js";
-import { uploadProductImages } from "../upload/products.js"
-
 
 const router = Router();
 
-//Public Routes 
+// PUBLIC
 router.get("/", getProducts);
-router.get("bestsellers", getBestSellers);
+router.get("/best-sellers", getBestSellers);
 router.get("/:id", getProduct);
 
+// ADMIN
+router.post("/", protect, adminOnly, createProduct);
+router.put("/:id", protect, adminOnly, updateProduct);
+router.delete("/:id", protect, adminOnly, deleteProduct);
 
-//admin Only routes to create and upload product image
-
-router.post("/", protect, adminOnly,uploadProductImages, createProduct);
-
-router.put("/:id", protect, adminOnly, updateProduct)
-router.delete("/:id", protect, adminOnly, deleteProduct)
-
-
-export default Router
+export default router;

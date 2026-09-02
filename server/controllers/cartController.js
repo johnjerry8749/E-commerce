@@ -1,7 +1,7 @@
 import {
   getUserCartByUserId,
   addToCart,
-  updateCartItemQuantity,
+  updateCartItemQuantity as updateCartItemQuantityModel,
   removeCartItem,
   clearCart,
 } from "../models/Cart.js";
@@ -18,6 +18,8 @@ export const getUserCart = async (req, res) => {
       cart,
     });
   } catch (error) {
+    console.error("Get User Cart Error:", error);
+
     return res.status(500).json({
       success: false,
       message: "Error fetching user cart",
@@ -33,14 +35,28 @@ export const addItemToCart = async (req, res) => {
   try {
     const { productId, quantity = 1, size = null } = req.body;
 
-    if (!productId || quantity < 1) {
+    if (!productId) {
       return res.status(400).json({
         success: false,
-        message: "Please select a product and ensure quantity is at least 1",
+        message: "Product is required",
       });
     }
 
-    const cartItem = await addToCart(req.user.id, productId, quantity, size);
+    const parsedQuantity = Number(quantity);
+
+    if (!Number.isInteger(parsedQuantity) || parsedQuantity < 1) {
+      return res.status(400).json({
+        success: false,
+        message: "Quantity must be at least 1",
+      });
+    }
+
+    const cartItem = await addToCart(
+      req.user.id,
+      productId,
+      parsedQuantity,
+      size,
+    );
 
     return res.status(200).json({
       success: true,
@@ -48,6 +64,8 @@ export const addItemToCart = async (req, res) => {
       cartItem,
     });
   } catch (error) {
+    console.error("Add To Cart Error:", error);
+
     return res.status(500).json({
       success: false,
       message: "Error adding item to cart",
@@ -59,29 +77,31 @@ export const addItemToCart = async (req, res) => {
 // ========================================
 // UPDATE CART ITEM QUANTITY
 // ========================================
-export const updateCartItem = async (req, res) => {
+export const updateCartItemQuantity = async (req, res) => {
   try {
-    const { quantity } = req.body;
     const { cartItemId } = req.params;
+    const { quantity } = req.body;
 
     if (quantity === undefined) {
       return res.status(400).json({
         success: false,
-        message: "You must provide a quantity to update the cart item",
+        message: "Quantity is required",
       });
     }
 
-    if (quantity < 1) {
+    const parsedQuantity = Number(quantity);
+
+    if (!Number.isInteger(parsedQuantity) || parsedQuantity < 1) {
       return res.status(400).json({
         success: false,
         message: "Quantity must be at least 1",
       });
     }
 
-    const item = await updateCartItemQuantity(
+    const item = await updateCartItemQuantityModel(
       cartItemId,
       req.user.id,
-      quantity,
+      parsedQuantity,
     );
 
     if (!item) {
@@ -97,6 +117,8 @@ export const updateCartItem = async (req, res) => {
       cartItem: item,
     });
   } catch (error) {
+    console.error("Update Cart Item Error:", error);
+
     return res.status(500).json({
       success: false,
       message: "Error updating cart item",
@@ -108,7 +130,7 @@ export const updateCartItem = async (req, res) => {
 // ========================================
 // REMOVE CART ITEM
 // ========================================
-export const removeCartItemFromCart = async (req, res) => {
+export const removeCartItemfromCart = async (req, res) => {
   try {
     const { cartItemId } = req.params;
 
@@ -127,7 +149,7 @@ export const removeCartItemFromCart = async (req, res) => {
       cartItem: item,
     });
   } catch (error) {
-    console.error("Error removing cart item:", error);
+    console.error("Remove Cart Item Error:", error);
 
     return res.status(500).json({
       success: false,
@@ -150,6 +172,8 @@ export const clearUserCart = async (req, res) => {
       deletedItems,
     });
   } catch (error) {
+    console.error("Clear Cart Error:", error);
+
     return res.status(500).json({
       success: false,
       message: "Error clearing cart",
