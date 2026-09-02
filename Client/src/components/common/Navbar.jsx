@@ -38,7 +38,7 @@ const Navbar = () => {
   // LOGIN / PROFILE PAGE
   const Userpage = () => {
     if (user) {
-      navigate("/Profile");
+      navigate("/");
     } else {
       navigate("/Login");
     }
@@ -49,9 +49,9 @@ const Navbar = () => {
       {/* =========================
           TOP INFO BAR
       ========================== */}
-      <div className="bg-danger text-light text-end">
+      <div className="bg-danger text-light text-start">
         <div className="container-fluid">
-          <div className="d-flex justify-content-end align-items-center gap-3 pe-3">
+          <div className=" justify-content-start pe-3 pb-2">
             <p className="mb-0">+1234567890</p>
             <p className="mb-0">support@yourstore.com</p>
           </div>
