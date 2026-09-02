@@ -1,4 +1,6 @@
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
+import { useAuth } from "./components/context/AuthContext.jsx";
+
 import AllHomecomponents from "./components/pages/AllHomecomponents.jsx";
 import ProductDetails from "./components/pages/ProductDetails.jsx";
 import Collections from "./components/pages/Collections.jsx";
@@ -14,11 +16,24 @@ import AddProduct from "./components/admin/pages/Product/AddProduct.jsx";
 import ProductList from "./components/admin/pages/Product/ProductList.jsx";
 import EditProduct from "./components/admin/pages/Product/EditProduct.jsx";
 
+const ProtectedAdminRoute = ({ children }) => {
+  const { isAuthenticated, isAdmin } = useAuth();
+
+  if (!isAuthenticated) {
+    return <Navigate to="/Login" replace />;
+  }
+
+  if (!isAdmin) {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
+};
+
 const App = () => {
   return (
     <div>
       <Routes>
-        {/* Home Page */}
         <Route path="/" element={<AllHomecomponents />} />
         <Route path="/productdetails/:id" element={<ProductDetails />} />
         <Route path="/Collections" element={<Collections />} />
@@ -27,16 +42,41 @@ const App = () => {
         <Route path="/Cart" element={<Cart />} />
         <Route path="/Login" element={<Login />} />
         <Route path="/Register" element={<Register />} />
-      </Routes>
-      {/* ADMIN ROUTES LOGIN */}
-      <Routes>
+
         <Route path="/AuthisAdmin" element={<AuthisAdmin />} />
 
-        {/* AUTHORISED ADMIN ROUTES BEGIN */}
-        <Route path="/AuthDashboard" element={<AuthDashboard />} />
-        <Route path="/AddProducts" element={<AddProduct />} />
-        <Route path="/ProductList" element={<ProductList />} />
-        <Route path="/EditProduct" element={<EditProduct />} />
+        <Route
+          path="/AuthDashboard"
+          element={
+            <ProtectedAdminRoute>
+              <AuthDashboard />
+            </ProtectedAdminRoute>
+          }
+        />
+        <Route
+          path="/AddProducts"
+          element={
+            <ProtectedAdminRoute>
+              <AddProduct />
+            </ProtectedAdminRoute>
+          }
+        />
+        <Route
+          path="/ProductList"
+          element={
+            <ProtectedAdminRoute>
+              <ProductList />
+            </ProtectedAdminRoute>
+          }
+        />
+        <Route
+          path="/EditProduct"
+          element={
+            <ProtectedAdminRoute>
+              <EditProduct />
+            </ProtectedAdminRoute>
+          }
+        />
       </Routes>
     </div>
   );
