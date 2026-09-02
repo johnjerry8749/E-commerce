@@ -24,14 +24,3 @@ export const registerValidator = [
     .withMessage(" must be at least 4 characters")
 ]
 
-export const ProductValidator = [
-    body("name")
-    .trim()
-    .notEmpty()
-    .withMessage("Product Name is Required")
-    .isLength({min: 3})
-    .withMessage("Product Name must be at least 3 characters"),
-    body("price")
-    .isFloat({ gt: 0 })
-    .withMessage("Price must be a positive number")
-];

@@ -29,7 +29,7 @@ export const register = async (req, res) => {
 
     const hashedPassword = await hashPasswod(password);
     const newUser = await Registeruser(name, email, hashedPassword);
-    const token = await generateToken(newUser.id);
+    const token = await generateToken(newUser);
 
     return res.status(201).json({
       success: true,
@@ -39,6 +39,7 @@ export const register = async (req, res) => {
         id: newUser.id,
         name: newUser.name,
         email: newUser.email,
+        role: newUser.role,
       },
     });
   } catch (error) {
@@ -82,7 +83,7 @@ export const login = async (req, res) => {
       });
     }
 
-    const token = await generateToken(user.id);
+    const token = await generateToken(user);
 
     return res.status(200).json({
       success: true,
