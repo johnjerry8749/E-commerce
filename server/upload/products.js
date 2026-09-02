@@ -3,12 +3,11 @@ import { CloudinaryStorage } from "multer-storage-cloudinary";
 import cloudinary from "../config/cloudinary.js";
 
 // ========================================
-// MAIN IMAGE
+// CLOUDINARY STORAGE
 // ========================================
 
-const mainStorage = new CloudinaryStorage({
+const storage = new CloudinaryStorage({
   cloudinary,
-
   params: {
     folder: "E_commerce/Product_img",
     allowed_formats: ["jpg", "jpeg", "png", "webp"],
@@ -16,39 +15,28 @@ const mainStorage = new CloudinaryStorage({
 });
 
 // ========================================
-// OTHER IMAGES
+// MULTER UPLOAD
 // ========================================
 
-const otherImageFolders = [
-  "E_commerce/Pimg_one",
-  "E_commerce/Pimg_two",
-  "E_commerce/Pimg_three",
-];
-
-const otherImageStorages = otherImageFolders.map(
-  (folder) =>
-    new CloudinaryStorage({
-      cloudinary,
-
-      params: {
-        folder,
-        allowed_formats: ["jpg", "jpeg", "png", "webp"],
-      },
-    }),
-);
-
-// ========================================
-// MAIN IMAGE
-// ========================================
-
-export const uploadMain = multer({
-  storage: mainStorage,
+const upload = multer({
+  storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  },
 });
 
 // ========================================
-// OTHER IMAGES
+// EXPORTS
 // ========================================
 
-export const uploadOtherImages = multer({
-  storage: otherImageStorages[0],
-}).array("otherImages", 3);
+// Use this for create / update product
+// Expects:
+// - mainImage (single)
+// - otherImages (array, up to 3)
+export const uploadProductImages = upload.fields([
+  { name: "mainImage", maxCount: 1 },
+  { name: "otherImages", maxCount: 3 },
+]);
+
+// Optional: if you ever need only the main image
+export const uploadMainImage = upload.single("mainImage");
