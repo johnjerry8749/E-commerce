@@ -15,14 +15,18 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const allowedOrigins = (
-  process.env.FRONTEND_URL ||
-  process.env.FrontEndUrl ||
-  "http://localhost:5173"
+const configuredOrigins = (
+  process.env.FRONTEND_URL || process.env.FrontEndUrl || ""
 )
   .split(",")
   .map((origin) => origin.trim())
   .filter(Boolean);
+
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://e-commerce-blue-ten-17.vercel.app",
+  ...configuredOrigins,
+];
 
 // ========================================
 // MIDDLEWARE
