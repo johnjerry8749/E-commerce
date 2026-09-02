@@ -20,11 +20,15 @@ const ProtectedAdminRoute = ({ children }) => {
   const { isAuthenticated, isAdmin } = useAuth();
 
   if (!isAuthenticated) {
+    console.log("Only Admin is Authorised")
     return <Navigate to="/Login" replace />;
+    
   }
 
   if (!isAdmin) {
+    console.log("You are not Allowed to Login Here")
     return <Navigate to="/" replace />;
+    
   }
 
   return children;
