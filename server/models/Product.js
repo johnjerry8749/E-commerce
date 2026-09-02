@@ -62,6 +62,16 @@ export const getProductById = async (id) => {
 
 
 // ========================================
+// GET ALL PRODUCTS
+// ========================================
+
+export const getAllProducts = async () => {
+  const result = await pool.query("SELECT * FROM products");
+  return result.rows;
+};
+
+
+// ========================================
 // UPDATE PRODUCT
 // ========================================
 
