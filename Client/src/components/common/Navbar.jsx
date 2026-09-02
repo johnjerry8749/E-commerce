@@ -129,28 +129,41 @@ const Navbar = () => {
                   USER / PROFILE
               ========================== */}
               <div className="image-container">
-                <div
-                  className="d-flex justify-content-center align-items-center rounded-circle"
-                  style={{
-                    width: "32px",
-                    height: "32px",
-                    backgroundColor: "#246BCE",
-                    color: "white",
-                    cursor: "pointer",
-                    fontSize: "13px",
-                    fontWeight: "600",
-                    textTransform: "uppercase",
-                  }}
-                  onClick={Userpage}
-                >
-                  {user
-                    ? user.name
-                        ?.split(" ")
-                        .map((word) => word[0])
-                        .join("")
-                        .slice(0, 2)
-                    : "?"}
-                </div>
+                {user ? (
+                  // LOGGED IN - PROFILE CIRCLE
+                  <div
+                    className="d-flex justify-content-center align-items-center rounded-circle"
+                    style={{
+                      width: "32px",
+                      height: "32px",
+                      backgroundColor: "#246BCE",
+                      color: "white",
+                      cursor: "pointer",
+                      fontSize: "13px",
+                      fontWeight: "600",
+                      textTransform: "uppercase",
+                    }}
+                    onClick={Userpage}
+                  >
+                    {user.name
+                      ?.split(" ")
+                      .map((word) => word[0])
+                      .join("")
+                      .slice(0, 2)}
+                  </div>
+                ) : (
+                  // NOT LOGGED IN - USER ICON
+                  <img
+                    src={user_icon}
+                    alt="Login"
+                    style={{
+                      width: "25px",
+                      height: "auto",
+                      cursor: "pointer",
+                    }}
+                    onClick={Userpage}
+                  />
+                )}
               </div>
 
               {/* =========================
