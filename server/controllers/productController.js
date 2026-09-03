@@ -8,28 +8,11 @@ import {
   filterProducts,
 } from "../models/Product.js";
 
-import { productValidator } from "../validators/productValidator.js";
-
 // ========================================
 // CREATE PRODUCT
 // ========================================
 export const createProduct = async (req, res) => {
   try {
-    // ========================================
-    // VALIDATION
-    // ========================================
-    const errors = productValidator(req);
-
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        errors: errors.array(),
-      });
-    }
-
-    // ========================================
-    // PRODUCT DETAILS
-    // ========================================
     const {
       name,
       description,
@@ -42,45 +25,70 @@ export const createProduct = async (req, res) => {
     } = req.body;
 
     // ========================================
-    // MAIN IMAGE
+    // VALIDATE REQUIRED FIELDS
+    // ========================================
+    if (!name || !description || !price || !category || !subCategory) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide all required product fields",
+      });
+    }
+
+    // ========================================
+    // CHECK IMAGES
     // ========================================
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({
         success: false,
-        message: "Main image is required",
+        message: "At least one product image is required",
       });
     }
 
-    const mainImageUrl = req.files[0].path;
+    // ========================================
+    // GET IMAGE URLS
+    // ========================================
+    const imageUrls = req.files.map((file) => file.path);
+
+    const mainImageUrl = imageUrls[0];
+    const otherImageUrls = imageUrls.slice(1);
 
     // ========================================
-    // OTHER IMAGES
+    // PARSE SIZES
     // ========================================
-    const otherImages = req.files.slice(1);
+    let parsedSizes = [];
 
-    if (otherImages.length < 1) {
-      return res.status(400).json({
-        success: false,
-        message: "At least two product images are required",
-      });
+    if (sizes) {
+      try {
+        parsedSizes = JSON.parse(sizes);
+      } catch (error) {
+        parsedSizes = sizes
+          .split(",")
+          .map((size) => size.trim())
+          .filter(Boolean);
+      }
     }
 
-    const otherImageUrls = otherImages.map((file) => file.path);
+    // ========================================
+    // PARSE BESTSELLER
+    // ========================================
+    const isBestseller =
+      bestseller === "true" ||
+      bestseller === true;
 
     // ========================================
     // CREATE PRODUCT
     // ========================================
     const newProduct = await createProductModel(
-      name,
-      description,
-      price,
+      name.trim(),
+      description.trim(),
+      Number(price),
       category,
       subCategory,
-      sizes,
-      stock,
-      bestseller,
+      parsedSizes,
+      isBestseller,
+      Number(stock) || 0,
       mainImageUrl,
-      otherImageUrls,
+      otherImageUrls
     );
 
     // ========================================
@@ -107,19 +115,28 @@ export const createProduct = async (req, res) => {
 // ========================================
 export const getProducts = async (req, res) => {
   try {
-    const { category, subcategory } = req.query;
+    const {
+      category,
+      subCategory,
+    } = req.query;
 
     let products;
 
-    if (category || subcategory) {
+    // ========================================
+    // FILTER PRODUCTS
+    // ========================================
+    if (category || subCategory) {
       products = await filterProducts({
         category,
-        subcategory,
+        subCategory,
       });
     } else {
       products = await getAllProducts();
     }
 
+    // ========================================
+    // RESPONSE
+    // ========================================
     return res.status(200).json({
       success: true,
       products,
@@ -142,8 +159,14 @@ export const getProduct = async (req, res) => {
   try {
     const { id } = req.params;
 
+    // ========================================
+    // FIND PRODUCT
+    // ========================================
     const product = await getProductById(id);
 
+    // ========================================
+    // PRODUCT NOT FOUND
+    // ========================================
     if (!product) {
       return res.status(404).json({
         success: false,
@@ -151,6 +174,9 @@ export const getProduct = async (req, res) => {
       });
     }
 
+    // ========================================
+    // RESPONSE
+    // ========================================
     return res.status(200).json({
       success: true,
       product,
@@ -176,36 +202,71 @@ export const updateProduct = async (req, res) => {
       description,
       price,
       category,
-      subcategory,
-      size,
+      subCategory,
+      sizes,
+      stock,
       bestseller,
     } = req.body;
 
     // ========================================
-    // OPTIONAL IMAGE UPDATES
+    // PARSE SIZES
     // ========================================
-    const mainImage = req.file ? req.file.path : null;
+    let parsedSizes = sizes;
 
-    const otherImages = req.files ? req.files.map((file) => file.path) : null;
+    if (sizes) {
+      try {
+        parsedSizes = JSON.parse(sizes);
+      } catch (error) {
+        parsedSizes = sizes
+          .split(",")
+          .map((size) => size.trim())
+          .filter(Boolean);
+      }
+    }
+
+    // ========================================
+    // PARSE BESTSELLER
+    // ========================================
+    const isBestseller =
+      bestseller === "true" ||
+      bestseller === true;
+
+    // ========================================
+    // IMAGE UPDATES
+    // ========================================
+    let mainImage = null;
+    let otherImages = null;
+
+    if (req.files && req.files.length > 0) {
+      const imageUrls = req.files.map(
+        (file) => file.path
+      );
+
+      mainImage = imageUrls[0];
+      otherImages = imageUrls.slice(1);
+    }
 
     // ========================================
     // UPDATE PRODUCT
     // ========================================
     const product = await updateProductModel(
       req.params.id,
-      name,
-      description,
-      price,
+      name?.trim(),
+      description?.trim(),
+      price ? Number(price) : undefined,
       category,
-      subcategory,
-      size,
-      bestseller,
+      subCategory,
+      parsedSizes,
+      isBestseller,
+      stock !== undefined
+        ? Number(stock)
+        : undefined,
       mainImage,
-      otherImages,
+      otherImages
     );
 
     // ========================================
-    // CHECK PRODUCT
+    // PRODUCT NOT FOUND
     // ========================================
     if (!product) {
       return res.status(404).json({
@@ -240,8 +301,14 @@ export const deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
 
+    // ========================================
+    // DELETE PRODUCT
+    // ========================================
     const product = await deleteProductModel(id);
 
+    // ========================================
+    // PRODUCT NOT FOUND
+    // ========================================
     if (!product) {
       return res.status(404).json({
         success: false,
@@ -249,6 +316,9 @@ export const deleteProduct = async (req, res) => {
       });
     }
 
+    // ========================================
+    // RESPONSE
+    // ========================================
     return res.status(200).json({
       success: true,
       message: "Product deleted successfully",
@@ -269,8 +339,14 @@ export const deleteProduct = async (req, res) => {
 // ========================================
 export const getBestSellers = async (req, res) => {
   try {
+    // ========================================
+    // GET BEST SELLERS
+    // ========================================
     const products = await bestSellers();
 
+    // ========================================
+    // RESPONSE
+    // ========================================
     return res.status(200).json({
       success: true,
       products,

@@ -44,7 +44,7 @@ const Sidebar = () => {
                 }}
               />
 
-              <p className="mb-0 d-none d-lg-block d-xl-block">Add Items</p>
+              <p className="mb-0 d-none d-lg-block text-dark d-xl-block">Add Items</p>
             </div>
 
             {/* LIST ITEMS */}
@@ -67,7 +67,7 @@ const Sidebar = () => {
                 }}
               />
 
-              <p className="mb-0 d-none d-lg-block d-xl-block">List Items</p>
+              <p className="mb-0 d-none d-lg-block text-dark d-xl-block">List Items</p>
             </div>
 
             {/* ORDERS */}
@@ -90,7 +90,7 @@ const Sidebar = () => {
                 }}
               />
 
-              <p className="mb-0 d-none d-lg-block d-xl-block">Orders</p>
+              <p className="mb-0 d-none text-dark d-lg-block d-xl-block">Orders</p>
             </div>
           </div>
         </div>

@@ -1,8 +1,7 @@
 import { Router } from "express";
 import { protect } from "../middleware/authMiddleware.js";
 import { adminOnly } from "../middleware/adminMiddleware.js";
-import { productValidator } from "../validators/productValidator.js";
-import { uploadImages } from "../upload/products.js";
+import { uploadProductImages } from "../upload/products.js";   // ← ADD THIS
 
 import {
   createProduct,
@@ -20,16 +19,9 @@ router.get("/", getProducts);
 router.get("/best-sellers", getBestSellers);
 router.get("/:id", getProduct);
 
-// ADMIN
-router.post(
-  "/",
-  protect,
-  adminOnly,
-  uploadImages,
-  productValidator,
-  createProduct,
-);
-router.put("/:id", protect, adminOnly, updateProduct);
+// ADMIN - ADD THE UPLOAD MIDDLEWARE HERE
+router.post("/", protect, adminOnly, uploadProductImages, createProduct);
+router.put("/:id", protect, adminOnly, uploadProductImages, updateProduct);
 router.delete("/:id", protect, adminOnly, deleteProduct);
 
 export default router;
