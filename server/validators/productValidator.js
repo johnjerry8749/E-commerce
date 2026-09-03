@@ -1,11 +1,14 @@
 import { body } from "express-validator";
 
 export const productValidator = [
-
   // PRODUCT IMAGE
-  body("Uploaded Image").custom((value, { req }) => {
-    if (!req.file) {
+  body("images").custom((value, { req }) => {
+    if (!req.files || req.files.length === 0) {
       throw new Error("Product Image is Required");
+    }
+
+    if (req.files.length > 4) {
+      throw new Error("Maximum of 4 images allowed");
     }
 
     return true;
@@ -40,9 +43,9 @@ export const productValidator = [
     .trim()
     .notEmpty()
     .withMessage("Sub Category is Required")
-    .isIn(["TopWear", "BottomWear", "FootWear", "Accessories"])
+    .isIn(["Topwear", "Bottomwear", "Footwear", "Accessories"])
     .withMessage(
-      "Sub Category must be TopWear, BottomWear, FootWear, or Accessories"
+      "Sub Category must be Topwear, Bottomwear, Footwear, or Accessories",
     ),
 
   // PRICE
@@ -60,10 +63,29 @@ export const productValidator = [
     .withMessage("Stock must be a whole number and cannot be negative"),
 
   // PRODUCT SIZE
-  body("productSize")
-    .trim()
-    .notEmpty()
-    .withMessage("Product Size is Required")
-    .isIn(["XS", "S", "M", "L", "XL"])
-    .withMessage("Product Size must be XS, S, M, L, or XL"),
+  body("sizes").custom((value) => {
+    let parsedSizes;
+
+    try {
+      parsedSizes = typeof value === "string" ? JSON.parse(value) : value;
+    } catch (error) {
+      throw new Error("Invalid product sizes");
+    }
+
+    if (!Array.isArray(parsedSizes) || parsedSizes.length === 0) {
+      throw new Error("At least one Product Size is Required");
+    }
+
+    const allowedSizes = ["XS", "S", "M", "L", "XL", "XXL"];
+
+    const invalidSize = parsedSizes.find(
+      (size) => !allowedSizes.includes(size),
+    );
+
+    if (invalidSize) {
+      throw new Error(`Invalid Product Size: ${invalidSize}`);
+    }
+
+    return true;
+  }),
 ];

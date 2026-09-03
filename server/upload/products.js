@@ -38,5 +38,7 @@ export const uploadProductImages = upload.fields([
   { name: "otherImages", maxCount: 3 },
 ]);
 
+export const uploadImages = upload.array("images", 4);
+
 // Optional: if you ever need only the main image
 export const uploadMainImage = upload.single("mainImage");

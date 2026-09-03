@@ -35,32 +35,33 @@ export const createProduct = async (req, res) => {
       description,
       price,
       category,
-      subcategory,
-      size,
+      subCategory,
+      sizes,
+      stock,
       bestseller,
     } = req.body;
 
     // ========================================
     // MAIN IMAGE
     // ========================================
-    if (!req.file) {
+    if (!req.files || req.files.length === 0) {
       return res.status(400).json({
         success: false,
         message: "Main image is required",
       });
     }
 
-    const mainImageUrl = req.file.path;
+    const mainImageUrl = req.files[0].path;
 
     // ========================================
     // OTHER IMAGES
     // ========================================
-    const otherImages = req.files;
+    const otherImages = req.files.slice(1);
 
-    if (!otherImages || otherImages.length < 2) {
+    if (otherImages.length < 1) {
       return res.status(400).json({
         success: false,
-        message: "At least two other images are required",
+        message: "At least two product images are required",
       });
     }
 
@@ -74,8 +75,9 @@ export const createProduct = async (req, res) => {
       description,
       price,
       category,
-      subcategory,
-      size,
+      subCategory,
+      sizes,
+      stock,
       bestseller,
       mainImageUrl,
       otherImageUrls,
