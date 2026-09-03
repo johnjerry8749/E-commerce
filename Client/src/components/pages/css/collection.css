@@ -326,8 +326,6 @@
           height: 320px;
 
           overflow: hidden;
-
-          background: #f7f7f7;
         }
 
         .product-image {
@@ -487,7 +485,7 @@
           }
 
           .product-image-wrapper {
-            height: 210px;
+            height: 165px;
           }
 
           .product-info {
@@ -520,7 +518,7 @@
           }
 
           .product-image-wrapper {
-            height: 180px;
+            height: 125px;
           }
 
         }
