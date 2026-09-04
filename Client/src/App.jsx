@@ -55,7 +55,7 @@ const App = () => {
         <Route path="/AuthisAdmin" element={<AuthisAdmin />} />
 
         <Route
-          path="/AuthDashboard/AddProducts"
+          path="/AuthDashboard"
           element={
             <ProtectedAdminRoute>
               <AuthDashboard />

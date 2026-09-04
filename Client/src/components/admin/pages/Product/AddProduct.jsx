@@ -8,6 +8,9 @@ import { createProduct } from "../../../services/productServices.js";
 const AddProduct = () => {
   const navigate = useNavigate();
 
+  // =========================
+  // IMAGES
+  // =========================
   const [images, setImages] = useState({
     image1: null,
     image2: null,
@@ -22,6 +25,9 @@ const AddProduct = () => {
     image4: null,
   });
 
+  // =========================
+  // FORM DATA
+  // =========================
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -38,105 +44,232 @@ const AddProduct = () => {
 
   const sizes = ["S", "M", "L", "XL", "XXL"];
 
-  // Handle text / select / checkbox inputs
+  // =========================
+  // HANDLE INPUTS
+  // =========================
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+
     setFormData((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
   };
 
-  // Handle image selection + preview
+  // =========================
+  // HANDLE IMAGE UPLOAD
+  // =========================
   const handleImageChange = (e, key) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
+
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
-      alert("Please select an image file");
+      alert("Please select an image file.");
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      alert("Image must be less than 5MB");
+      alert("Image must be less than 5MB.");
       return;
     }
 
-    setImages((prev) => ({ ...prev, [key]: file }));
+    setImages((prev) => ({
+      ...prev,
+      [key]: file,
+    }));
+
     setPreview((prev) => ({
       ...prev,
       [key]: URL.createObjectURL(file),
     }));
+
+    // Remove image error after selecting image
+    setErrors((prev) => ({
+      ...prev,
+      [key]: "",
+    }));
   };
 
-  // Toggle size selection
+  // =========================
+  // SELECT SIZE
+  // =========================
   const toggleSize = (size) => {
     setSelectedSizes((prev) =>
-      prev.includes(size) ? prev.filter((s) => s !== size) : [...prev, size],
+      prev.includes(size)
+        ? prev.filter((item) => item !== size)
+        : [...prev, size]
     );
+
+    setErrors((prev) => ({
+      ...prev,
+      sizes: "",
+    }));
   };
 
-  // Client-side validation
+  // =========================
+  // VALIDATION
+  // =========================
   const validate = () => {
     const newErrors = {};
 
-    if (!images.image1) newErrors.image1 = "Main image is required";
-    if (!images.image2) newErrors.image2 = "At least 2 images are required";
-    if (!formData.name.trim() || formData.name.trim().length < 3)
+    if (!images.image1) {
+      newErrors.image1 = "Main image is required";
+    }
+
+    if (!images.image2) {
+      newErrors.image2 = "At least 2 images are required";
+    }
+
+    if (!formData.name.trim()) {
+      newErrors.name = "Product name is required";
+    } else if (formData.name.trim().length < 3) {
       newErrors.name = "Name must be at least 3 characters";
-    if (!formData.description.trim() || formData.description.trim().length < 10)
-      newErrors.description = "Description must be at least 10 characters";
-    if (!formData.price || Number(formData.price) <= 0)
-      newErrors.price = "Price must be a positive number";
-    if (selectedSizes.length === 0)
+    }
+
+    if (!formData.description.trim()) {
+      newErrors.description = "Product description is required";
+    } else if (formData.description.trim().length < 10) {
+      newErrors.description =
+        "Description must be at least 10 characters";
+    }
+
+    if (!formData.price || Number(formData.price) <= 0) {
+      newErrors.price = "Price must be greater than 0";
+    }
+
+    if (selectedSizes.length === 0) {
       newErrors.sizes = "Select at least one size";
+    }
 
     setErrors(newErrors);
+
     return Object.keys(newErrors).length === 0;
   };
 
-  // Submit form
+  // =========================
+  // SUBMIT PRODUCT
+  // =========================
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     setServerError("");
 
-    if (!validate()) return;
+    // Validate form
+    const isValid = validate();
+
+    if (!isValid) {
+      return;
+    }
 
     setLoading(true);
 
     try {
       const data = new FormData();
 
-      // Images
+      // =========================
+      // IMAGES
+      // =========================
+
       data.append("mainImage", images.image1);
+
       data.append("otherImages", images.image2);
-      if (images.image3) data.append("otherImages", images.image3);
-      if (images.image4) data.append("otherImages", images.image4);
 
-      // Text fields
+      if (images.image3) {
+        data.append("otherImages", images.image3);
+      }
+
+      if (images.image4) {
+        data.append("otherImages", images.image4);
+      }
+
+      // =========================
+      // PRODUCT INFORMATION
+      // =========================
+
       data.append("name", formData.name.trim());
-      data.append("description", formData.description.trim());
+
+      data.append(
+        "description",
+        formData.description.trim()
+      );
+
       data.append("category", formData.category);
-      data.append("subcategory", formData.subcategory);
+
+      data.append(
+        "subcategory",
+        formData.subcategory
+      );
+
       data.append("price", formData.price);
-      data.append("size", JSON.stringify(selectedSizes)); // multiple sizes
-      data.append("bestseller", formData.bestseller);
 
-      const res = await createProduct(data);
+      data.append(
+        "size",
+        JSON.stringify(selectedSizes)
+      );
 
-      if (res.data.success) {
+      data.append(
+        "bestseller",
+        String(formData.bestseller)
+      );
+
+      // =========================
+      // SEND TO BACKEND
+      // =========================
+
+      const response = await createProduct(data);
+
+      console.log("CREATE PRODUCT RESPONSE:", response.data);
+
+      if (response.data?.success) {
         alert("Product added successfully!");
+
+        // Reset form
+        setImages({
+          image1: null,
+          image2: null,
+          image3: null,
+          image4: null,
+        });
+
+        setPreview({
+          image1: null,
+          image2: null,
+          image3: null,
+          image4: null,
+        });
+
+        setFormData({
+          name: "",
+          description: "",
+          category: "Men",
+          subcategory: "Topwear",
+          price: "",
+          bestseller: false,
+        });
+
+        setSelectedSizes([]);
+        setErrors({});
+
+        // Go to product list
         navigate("/ProductList");
       } else {
-        setServerError(res.data.message || "Failed to add product");
+        setServerError(
+          response.data?.message ||
+            "Failed to add product."
+        );
       }
-    } catch (err) {
-      console.error(err);
-      const msg =
-        err.response?.data?.message ||
-        err.response?.data?.errors?.[0]?.msg ||
-        "Something went wrong.Please try again.";
-      setServerError(msg);
+    } catch (error) {
+      console.error(
+        "CREATE PRODUCT ERROR:",
+        error
+      );
+
+      setServerError(
+        error.response?.data?.message ||
+          error.response?.data?.error ||
+          "Unable to add product. Please try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -154,21 +287,36 @@ const AddProduct = () => {
 
         {/* CONTENT */}
         <div className="col-9 col-sm-9 col-md-9 col-lg-10 border-start border-3">
-          <form onSubmit={handleSubmit} className="p-3 p-md-4">
+          <form
+            onSubmit={handleSubmit}
+            className="p-3 p-md-4"
+          >
+            {/* =========================
+                UPLOAD IMAGES
+            ========================= */}
             <h5>Upload Images</h5>
+
             <p className="text-muted small">
-              First image is the main image. At least 2 images required.
+              First image is the main image. At least 2
+              images are required.
             </p>
 
             <div className="d-flex gap-2 gap-md-3 flex-wrap mb-2">
-              {["image1", "image2", "image3", "image4"].map((key, index) => (
+              {[
+                "image1",
+                "image2",
+                "image3",
+                "image4",
+              ].map((key, index) => (
                 <label
                   key={key}
                   className="text-center"
                   style={{ cursor: "pointer" }}
                 >
                   <img
-                    src={preview[key] || upload_area}
+                    src={
+                      preview[key] || upload_area
+                    }
                     alt={`Upload ${index + 1}`}
                     className="img-fluid"
                     style={{
@@ -177,28 +325,42 @@ const AddProduct = () => {
                       objectFit: "cover",
                       borderStyle: "dotted",
                       borderWidth: "1.5px",
-                      borderColor: errors[key] ? "red" : "#d1d5db",
+                      borderColor: errors[key]
+                        ? "red"
+                        : "#d1d5db",
                     }}
                   />
+
                   <input
                     type="file"
                     accept="image/*"
                     hidden
-                    onChange={(e) => handleImageChange(e, key)}
+                    onChange={(e) =>
+                      handleImageChange(e, key)
+                    }
                   />
                 </label>
               ))}
             </div>
+
             {errors.image1 && (
-              <div className="text-danger small mb-2">{errors.image1}</div>
-            )}
-            {errors.image2 && (
-              <div className="text-danger small mb-2">{errors.image2}</div>
+              <div className="text-danger small mb-2">
+                {errors.image1}
+              </div>
             )}
 
-            {/* Product Name */}
+            {errors.image2 && (
+              <div className="text-danger small mb-2">
+                {errors.image2}
+              </div>
+            )}
+
+            {/* =========================
+                PRODUCT NAME
+            ========================= */}
             <div className="mt-4">
               <h5>Product Name</h5>
+
               <input
                 type="text"
                 name="name"
@@ -206,16 +368,24 @@ const AddProduct = () => {
                 onChange={handleChange}
                 placeholder="Type here..."
                 className="form-control"
-                style={{ maxWidth: "400px" }}
+                style={{
+                  maxWidth: "400px",
+                }}
               />
+
               {errors.name && (
-                <div className="text-danger small">{errors.name}</div>
+                <div className="text-danger small">
+                  {errors.name}
+                </div>
               )}
             </div>
 
-            {/* Description */}
+            {/* =========================
+                DESCRIPTION
+            ========================= */}
             <div className="mt-4">
               <h5>Product Description</h5>
+
               <textarea
                 name="description"
                 value={formData.description}
@@ -223,48 +393,86 @@ const AddProduct = () => {
                 placeholder="Write content here..."
                 rows="5"
                 className="form-control"
-                style={{ maxWidth: "400px" }}
+                style={{
+                  maxWidth: "400px",
+                }}
               />
+
               {errors.description && (
-                <div className="text-danger small">{errors.description}</div>
+                <div className="text-danger small">
+                  {errors.description}
+                </div>
               )}
             </div>
 
-            <div className="mt-4" style={{ maxWidth: "700px" }}>
+            {/* =========================
+                CATEGORY / SUBCATEGORY / PRICE
+            ========================= */}
+            <div
+              className="mt-4"
+              style={{
+                maxWidth: "700px",
+              }}
+            >
               <div className="row g-3">
-                {/* Category */}
+                {/* CATEGORY */}
                 <div className="col-12 col-md-4">
-                  <label className="form-label fs-5">Product Category</label>
+                  <label className="form-label fs-5">
+                    Product Category
+                  </label>
+
                   <select
                     name="category"
                     value={formData.category}
                     onChange={handleChange}
                     className="form-select form-select-lg"
                   >
-                    <option value="Men">Men</option>
-                    <option value="Women">Women</option>
-                    <option value="Kids">Kids</option>
+                    <option value="Men">
+                      Men
+                    </option>
+
+                    <option value="Women">
+                      Women
+                    </option>
+
+                    <option value="Kids">
+                      Kids
+                    </option>
                   </select>
                 </div>
 
-                {/* Sub Category */}
+                {/* SUBCATEGORY */}
                 <div className="col-12 col-md-4">
-                  <label className="form-label fs-5">Sub Category</label>
+                  <label className="form-label fs-5">
+                    Sub Category
+                  </label>
+
                   <select
                     name="subcategory"
                     value={formData.subcategory}
                     onChange={handleChange}
                     className="form-select form-select-lg"
                   >
-                    <option value="Topwear">Topwear</option>
-                    <option value="Bottomwear">Bottomwear</option>
-                    <option value="Footwear">Footwear</option>
+                    <option value="Topwear">
+                      Topwear
+                    </option>
+
+                    <option value="Bottomwear">
+                      Bottomwear
+                    </option>
+
+                    <option value="Footwear">
+                      Footwear
+                    </option>
                   </select>
                 </div>
 
-                {/* Price */}
+                {/* PRICE */}
                 <div className="col-12 col-md-4">
-                  <label className="form-label fs-5">Product Price</label>
+                  <label className="form-label fs-5">
+                    Product Price
+                  </label>
+
                   <input
                     type="number"
                     name="price"
@@ -275,35 +483,52 @@ const AddProduct = () => {
                     step="0.01"
                     className="form-control form-control-lg"
                   />
+
                   {errors.price && (
-                    <div className="text-danger small">{errors.price}</div>
+                    <div className="text-danger small">
+                      {errors.price}
+                    </div>
                   )}
                 </div>
               </div>
 
-              {/* Sizes */}
+              {/* =========================
+                  SIZES
+              ========================= */}
               <div className="mt-4">
-                <label className="form-label fs-5 d-block">Product Sizes</label>
+                <label className="form-label fs-5 d-block">
+                  Product Sizes
+                </label>
+
                 <div className="d-flex flex-wrap gap-2">
                   {sizes.map((size) => (
                     <button
                       key={size}
                       type="button"
-                      onClick={() => toggleSize(size)}
+                      onClick={() =>
+                        toggleSize(size)
+                      }
                       className={`btn rounded-0 px-4 py-2 ${
-                        selectedSizes.includes(size) ? "btn-dark" : "btn-light"
+                        selectedSizes.includes(size)
+                          ? "btn-dark"
+                          : "btn-light"
                       }`}
                     >
                       {size}
                     </button>
                   ))}
                 </div>
+
                 {errors.sizes && (
-                  <div className="text-danger small mt-1">{errors.sizes}</div>
+                  <div className="text-danger small mt-1">
+                    {errors.sizes}
+                  </div>
                 )}
               </div>
 
-              {/* Bestseller */}
+              {/* =========================
+                  BESTSELLER
+              ========================= */}
               <div className="form-check mt-4">
                 <input
                   type="checkbox"
@@ -313,17 +538,27 @@ const AddProduct = () => {
                   checked={formData.bestseller}
                   onChange={handleChange}
                 />
-                <label className="form-check-label fs-5" htmlFor="bestseller">
+
+                <label
+                  className="form-check-label fs-5"
+                  htmlFor="bestseller"
+                >
                   Add to bestseller
                 </label>
               </div>
 
-              {/* Server error */}
+              {/* =========================
+                  SERVER ERROR
+              ========================= */}
               {serverError && (
-                <div className="alert alert-danger mt-3">{serverError}</div>
+                <div className="alert alert-danger mt-3">
+                  {serverError}
+                </div>
               )}
 
-              {/* Submit */}
+              {/* =========================
+                  ADD BUTTON
+              ========================= */}
               <button
                 type="submit"
                 disabled={loading}
@@ -339,4 +574,4 @@ const AddProduct = () => {
   );
 };
 
-export default AddProduct;
+export default AddProduct
