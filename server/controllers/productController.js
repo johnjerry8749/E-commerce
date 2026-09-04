@@ -37,20 +37,29 @@ export const createProduct = async (req, res) => {
     // ========================================
     // CHECK IMAGES
     // ========================================
-    if (!req.files || req.files.length === 0) {
+    if(!req.files?.mainImages?.[0]){
       return res.status(400).json({
         success: false,
-        message: "At least one product image is required",
-      });
+        message: "main Image is Required",
+      })
     }
-
     // ========================================
     // GET IMAGE URLS
     // ========================================
-    const imageUrls = req.files.map((file) => file.path);
+    const mainImageUrl = req.files.mainImage[0].path;
 
-    const mainImageUrl = imageUrls[0];
-    const otherImageUrls = imageUrls.slice(1);
+
+        // ========================================
+    // OTHER IMAGES
+    // ========================================
+    const oterImages = req.files?.otherImages || [];
+    if (otherImages.length < 2){
+      return res.status(400).json({
+        success: false,
+        message: "At least Two Other Images are required",
+      })
+    }
+    const otherImagesUrls = otherImages.map((file) => file.path)
 
     // ========================================
     // PARSE SIZES
