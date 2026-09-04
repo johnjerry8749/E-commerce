@@ -55,7 +55,7 @@ const App = () => {
         <Route path="/AuthisAdmin" element={<AuthisAdmin />} />
 
         <Route
-          path="/AuthDashboard"
+          path="/AuthDashboard/AddProducts"
           element={
             <ProtectedAdminRoute>
               <AuthDashboard />
@@ -63,7 +63,7 @@ const App = () => {
           }
         />
         <Route
-          path="/AddProducts"
+          path="/AuthDashboard/AddProducts"
           element={
             <ProtectedAdminRoute>
               <AddProduct />
@@ -71,7 +71,7 @@ const App = () => {
           }
         />
         <Route
-          path="/ProductList"
+          path="/AuthDashboard/ProductList"
           element={
             <ProtectedAdminRoute>
               <ProductList />
@@ -79,7 +79,7 @@ const App = () => {
           }
         />
         <Route
-          path="/EditProduct"
+          path="/AuthDashboard/EditProduct"
           element={
             <ProtectedAdminRoute>
               <EditProduct />

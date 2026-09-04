@@ -8,15 +8,15 @@ const Sidebar = () => {
   const [active, setActive] = useState("Add Items");
 
   const AddProductpage = () => {
-    navigate("/AddProducts");
+    navigate("/AuthDashboard/AddProducts");
   };
 
   const OrderListpage = () => {
-    navigate("/AddProducts");
+    navigate("/AuthDashboard/AddProducts");
   };
 
   const Orderpage = () => {
-    navigate("/AddProducts");
+    navigate("/AuthDashboard/AddProducts");
   };
 
   return (

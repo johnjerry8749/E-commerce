@@ -18,91 +18,58 @@ export const createProduct = async (req, res) => {
       description,
       price,
       category,
-      subCategory,
-      sizes,
-      stock,
+      subcategory,
+      size,
       bestseller,
     } = req.body;
 
-    // ========================================
-    // VALIDATE REQUIRED FIELDS
-    // ========================================
-    if (!name || !description || !price || !category || !subCategory) {
+    // ===== Images from multer fields =====
+    if (!req.files || !req.files.mainImage || !req.files.mainImage[0]) {
       return res.status(400).json({
         success: false,
-        message: "Please provide all required product fields",
+        message: "Main image is required",
       });
     }
 
-    // ========================================
-    // CHECK IMAGES
-    // ========================================
-    if(!req.files?.mainImages?.[0]){
-      return res.status(400).json({
-        success: false,
-        message: "main Image is Required",
-      })
-    }
-    // ========================================
-    // GET IMAGE URLS
-    // ========================================
     const mainImageUrl = req.files.mainImage[0].path;
 
-
-        // ========================================
-    // OTHER IMAGES
-    // ========================================
-    const oterImages = req.files?.otherImages || [];
-    if (otherImages.length < 2){
+    const otherImages = req.files.otherImages || [];
+    if (otherImages.length < 1) {
       return res.status(400).json({
         success: false,
-        message: "At least Two Other Images are required",
-      })
-    }
-    const otherImagesUrls = otherImages.map((file) => file.path)
-
-    // ========================================
-    // PARSE SIZES
-    // ========================================
-    let parsedSizes = [];
-
-    if (sizes) {
-      try {
-        parsedSizes = JSON.parse(sizes);
-      } catch (error) {
-        parsedSizes = sizes
-          .split(",")
-          .map((size) => size.trim())
-          .filter(Boolean);
-      }
+        message: "At least one other image is required",
+      });
     }
 
-    // ========================================
-    // PARSE BESTSELLER
-    // ========================================
+    const otherImageUrls = otherImages.map((file) => file.path);
+
+    // Parse size (JSON array)
+    let parsedSize = size;
+    try {
+      parsedSize = JSON.parse(size);
+    } catch {
+      // already a string or array – leave as is
+    }
+
+    // Convert bestseller to boolean
     const isBestseller =
+      bestseller === true ||
       bestseller === "true" ||
-      bestseller === true;
+      bestseller === "on" ||
+      bestseller === "1";
 
-    // ========================================
-    // CREATE PRODUCT
-    // ========================================
     const newProduct = await createProductModel(
-      name.trim(),
-      description.trim(),
-      Number(price),
+      name,
+      description,
+      price,
       category,
-      subCategory,
-      parsedSizes,
+      subcategory,
+      parsedSize,          // array or string
       isBestseller,
-      Number(stock) || 0,
       mainImageUrl,
       otherImageUrls
     );
 
-    // ========================================
-    // RESPONSE
-    // ========================================
     return res.status(201).json({
       success: true,
       message: "Product created successfully",
@@ -110,7 +77,6 @@ export const createProduct = async (req, res) => {
     });
   } catch (error) {
     console.error("Create Product Error:", error);
-
     return res.status(500).json({
       success: false,
       message: "Server error",
@@ -124,35 +90,21 @@ export const createProduct = async (req, res) => {
 // ========================================
 export const getProducts = async (req, res) => {
   try {
-    const {
-      category,
-      subCategory,
-    } = req.query;
+    const { category, subcategory } = req.query;
 
     let products;
-
-    // ========================================
-    // FILTER PRODUCTS
-    // ========================================
-    if (category || subCategory) {
-      products = await filterProducts({
-        category,
-        subCategory,
-      });
+    if (category || subcategory) {
+      products = await filterProducts({ category, subcategory });
     } else {
       products = await getAllProducts();
     }
 
-    // ========================================
-    // RESPONSE
-    // ========================================
     return res.status(200).json({
       success: true,
       products,
     });
   } catch (error) {
     console.error("Get Products Error:", error);
-
     return res.status(500).json({
       success: false,
       message: "Server error",
@@ -167,15 +119,8 @@ export const getProducts = async (req, res) => {
 export const getProduct = async (req, res) => {
   try {
     const { id } = req.params;
-
-    // ========================================
-    // FIND PRODUCT
-    // ========================================
     const product = await getProductById(id);
 
-    // ========================================
-    // PRODUCT NOT FOUND
-    // ========================================
     if (!product) {
       return res.status(404).json({
         success: false,
@@ -183,16 +128,12 @@ export const getProduct = async (req, res) => {
       });
     }
 
-    // ========================================
-    // RESPONSE
-    // ========================================
     return res.status(200).json({
       success: true,
       product,
     });
   } catch (error) {
     console.error("Get Product Error:", error);
-
     return res.status(500).json({
       success: false,
       message: "Server error",
@@ -211,72 +152,46 @@ export const updateProduct = async (req, res) => {
       description,
       price,
       category,
-      subCategory,
-      sizes,
-      stock,
+      subcategory,
+      size,
       bestseller,
     } = req.body;
 
-    // ========================================
-    // PARSE SIZES
-    // ========================================
-    let parsedSizes = sizes;
-
-    if (sizes) {
-      try {
-        parsedSizes = JSON.parse(sizes);
-      } catch (error) {
-        parsedSizes = sizes
-          .split(",")
-          .map((size) => size.trim())
-          .filter(Boolean);
-      }
-    }
-
-    // ========================================
-    // PARSE BESTSELLER
-    // ========================================
-    const isBestseller =
-      bestseller === "true" ||
-      bestseller === true;
-
-    // ========================================
-    // IMAGE UPDATES
-    // ========================================
     let mainImage = null;
     let otherImages = null;
 
-    if (req.files && req.files.length > 0) {
-      const imageUrls = req.files.map(
-        (file) => file.path
-      );
-
-      mainImage = imageUrls[0];
-      otherImages = imageUrls.slice(1);
+    if (req.files?.mainImage?.[0]) {
+      mainImage = req.files.mainImage[0].path;
+    }
+    if (req.files?.otherImages?.length) {
+      otherImages = req.files.otherImages.map((f) => f.path);
     }
 
-    // ========================================
-    // UPDATE PRODUCT
-    // ========================================
+    let parsedSize = size;
+    try {
+      parsedSize = JSON.parse(size);
+    } catch {
+      // leave as is
+    }
+
+    const isBestseller =bestseller === true ||
+      bestseller === "true" ||
+      bestseller === "on" ||
+      bestseller === "1";
+
     const product = await updateProductModel(
       req.params.id,
-      name?.trim(),
-      description?.trim(),
-      price ? Number(price) : undefined,
+      name,
+      description,
+      price,
       category,
-      subCategory,
-      parsedSizes,
+      subcategory,
+      parsedSize,
       isBestseller,
-      stock !== undefined
-        ? Number(stock)
-        : undefined,
       mainImage,
       otherImages
     );
 
-    // ========================================
-    // PRODUCT NOT FOUND
-    // ========================================
     if (!product) {
       return res.status(404).json({
         success: false,
@@ -284,9 +199,6 @@ export const updateProduct = async (req, res) => {
       });
     }
 
-    // ========================================
-    // RESPONSE
-    // ========================================
     return res.status(200).json({
       success: true,
       message: "Product updated successfully",
@@ -294,7 +206,6 @@ export const updateProduct = async (req, res) => {
     });
   } catch (error) {
     console.error("Update Product Error:", error);
-
     return res.status(500).json({
       success: false,
       message: "Server error",
@@ -309,15 +220,8 @@ export const updateProduct = async (req, res) => {
 export const deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
-
-    // ========================================
-    // DELETE PRODUCT
-    // ========================================
     const product = await deleteProductModel(id);
 
-    // ========================================
-    // PRODUCT NOT FOUND
-    // ========================================
     if (!product) {
       return res.status(404).json({
         success: false,
@@ -325,16 +229,12 @@ export const deleteProduct = async (req, res) => {
       });
     }
 
-    // ========================================
-    // RESPONSE
-    // ========================================
     return res.status(200).json({
       success: true,
       message: "Product deleted successfully",
     });
   } catch (error) {
     console.error("Delete Product Error:", error);
-
     return res.status(500).json({
       success: false,
       message: "Server error",
@@ -348,21 +248,13 @@ export const deleteProduct = async (req, res) => {
 // ========================================
 export const getBestSellers = async (req, res) => {
   try {
-    // ========================================
-    // GET BEST SELLERS
-    // ========================================
     const products = await bestSellers();
-
-    // ========================================
-    // RESPONSE
-    // ========================================
     return res.status(200).json({
       success: true,
       products,
     });
   } catch (error) {
     console.error("Best Sellers Error:", error);
-
     return res.status(500).json({
       success: false,
       message: "Server error",

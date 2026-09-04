@@ -42,7 +42,7 @@ const AdminLogin = () => {
       // IMPORTANT: update React state + localStorage together
       login(data.user, data.token);
 
-      navigate("/AuthDashboard");
+      navigate("/AuthDashboard/AddProducts");
     } catch (requestError) {
       console.error("Admin Login Error:", requestError);
       setError(requestError.response?.data?.message || "Login failed");

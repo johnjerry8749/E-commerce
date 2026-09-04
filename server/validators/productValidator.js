@@ -1,19 +1,6 @@
 import { body } from "express-validator";
 
 export const productValidator = [
-  // PRODUCT IMAGE
-  body("images").custom((value, { req }) => {
-    if (!req.files || req.files.length === 0) {
-      throw new Error("Product Image is Required");
-    }
-
-    if (req.files.length > 4) {
-      throw new Error("Maximum of 4 images allowed");
-    }
-
-    return true;
-  }),
-
   // PRODUCT NAME
   body("name")
     .trim()
@@ -39,14 +26,12 @@ export const productValidator = [
     .withMessage("Category must be Men, Women, or Kids"),
 
   // SUB CATEGORY
-  body("subCategory")
+  body("subcategory")
     .trim()
     .notEmpty()
     .withMessage("Sub Category is Required")
-    .isIn(["Topwear", "Bottomwear", "Footwear", "Accessories"])
-    .withMessage(
-      "Sub Category must be Topwear, Bottomwear, Footwear, or Accessories",
-    ),
+    .isIn(["Topwear", "Bottomwear", "Footwear"])
+    .withMessage("Sub Category must be Topwear, Bottomwear, or Footwear"),
 
   // PRICE
   body("price")
@@ -55,37 +40,24 @@ export const productValidator = [
     .isFloat({ gt: 0 })
     .withMessage("Price must be a positive number"),
 
-  // STOCK
-  body("stock")
+  // SIZES (JSON string of array)
+  body("size")
     .notEmpty()
-    .withMessage("Product Stock is Required")
-    .isInt({ min: 0 })
-    .withMessage("Stock must be a whole number and cannot be negative"),
-
-  // PRODUCT SIZE
-  body("sizes").custom((value) => {
-    let parsedSizes;
-
-    try {
-      parsedSizes = typeof value === "string" ? JSON.parse(value) : value;
-    } catch (error) {
-      throw new Error("Invalid product sizes");
-    }
-
-    if (!Array.isArray(parsedSizes) || parsedSizes.length === 0) {
-      throw new Error("At least one Product Size is Required");
-    }
-
-    const allowedSizes = ["XS", "S", "M", "L", "XL", "XXL"];
-
-    const invalidSize = parsedSizes.find(
-      (size) => !allowedSizes.includes(size),
-    );
-
-    if (invalidSize) {
-      throw new Error(`Invalid Product Size: ${invalidSize}`);
-    }
-
-    return true;
-  }),
+    .withMessage("At least one size is required")
+    .custom((value) => {
+      try {
+        const sizes = JSON.parse(value);
+        if (!Array.isArray(sizes) || sizes.length === 0) {
+          throw new Error("At least one size is required");
+        }
+        const allowed = ["S", "M", "L", "XL", "XXL"];
+        const invalid = sizes.some((s) => !allowed.includes(s));
+        if (invalid) {
+          throw new Error("Invalid size selected");
+        }
+        return true;
+      } catch (err) {
+        throw new Error(err.message || "Invalid size format");
+      }
+    }),
 ];
