@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { adminLogin } from "../../../services/authService.js";
-import { useAuth } from "../../../context/AuthContext.jsx";
+import { useAuth } from "../../../context/AuthContext.jsx"; // ← add this
 
 const AdminLogin = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login } = useAuth(); // ← add this
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -39,18 +39,13 @@ const AdminLogin = () => {
         return;
       }
 
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
-
+      // IMPORTANT: update React state + localStorage together
       login(data.user, data.token);
 
       navigate("/AuthDashboard");
     } catch (requestError) {
       console.error("Admin Login Error:", requestError);
-
-      setError(
-        requestError.response?.data?.message || "Login failed"
-      );
+      setError(requestError.response?.data?.message || "Login failed");
     } finally {
       setLoading(false);
     }

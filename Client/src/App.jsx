@@ -19,20 +19,21 @@ import EditProduct from "./components/admin/pages/Product/EditProduct.jsx";
 const ProtectedAdminRoute = ({ children }) => {
   const { isAuthenticated, isAdmin, loading } = useAuth();
 
-  if(!loading){
-    return <div className="text-center p-5">Loading...</div>
+  // Wait until AuthContext has finished reading localStorage
+  if (loading) {
+    return (
+      <div className="d-flex justify-content-center align-items-center min-vh-100">
+        Loading...
+      </div>
+    );
   }
 
   if (!isAuthenticated) {
-    console.log("Only Admin is Authorised")
-    return <Navigate to="/Login" replace />;
-    
+    return <Navigate to="/AuthisAdmin" replace />;
   }
 
   if (!isAdmin) {
-    console.log("You are not Allowed to Login Here")
     return <Navigate to="/" replace />;
-    
   }
 
   return children;

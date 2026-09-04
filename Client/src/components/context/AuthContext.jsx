@@ -5,6 +5,7 @@ const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
+  // Restore from localStorage immediately (prevents flash / wrong redirect)
   const [user, setUser] = useState(() => {
     try {
       const saved = localStorage.getItem("user");
@@ -13,11 +14,12 @@ export const AuthProvider = ({ children }) => {
       return null;
     }
   });
+
   const [token, setToken] = useState(() => localStorage.getItem("token") || "");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Optional: you can still re-validate token here later
+    // Just mark hydration as done. State is already restored above.
     setLoading(false);
   }, []);
 
@@ -45,7 +47,9 @@ export const AuthProvider = ({ children }) => {
     isAdmin: user?.role === "admin",
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+  );
 };
 
 export default AuthContext;
