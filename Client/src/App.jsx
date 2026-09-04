@@ -17,7 +17,11 @@ import ProductList from "./components/admin/pages/Product/ProductList.jsx";
 import EditProduct from "./components/admin/pages/Product/EditProduct.jsx";
 
 const ProtectedAdminRoute = ({ children }) => {
-  const { isAuthenticated, isAdmin } = useAuth();
+  const { isAuthenticated, isAdmin, loading } = useAuth();
+
+  if(!loading){
+    return <div className="text-center p-5">Loading...</div>
+  }
 
   if (!isAuthenticated) {
     console.log("Only Admin is Authorised")
