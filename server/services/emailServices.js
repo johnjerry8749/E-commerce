@@ -44,12 +44,12 @@ export const sendNewsletterToSubscribers = async (req, res) => {
   try {
     const { productName } = req.body;
 
-    if (!productName) {
-      return res.status(400).json({
-        success: false,
-        message: "Product name is required",
-      });
-    }
+    // if (!productName) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: "Product name is required",
+    //   });
+    // }
 
     const subscribers = await pool.query(
       `SELECT email

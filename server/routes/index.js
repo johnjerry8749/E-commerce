@@ -5,6 +5,7 @@ import cartRouter from "./cartRoutes.js";
 import orderRouter from "./orderRoutes.js";
 import productRouter from "./productRoutes.js";
 import adminRouter from "./adminRoutes.js";
+import userRouter from "./userRoutes.js";
 
 const router = Router();
 
@@ -32,5 +33,11 @@ router.use("/products", productRouter);
 // ADMIN ROUTES
 // ========================================
 router.use("/admin", adminRouter);
+
+
+//=========================
+//USER ROUTES
+//=======================
+router.use("/users", userRouter);
 
 export default router;
