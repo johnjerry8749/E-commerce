@@ -5,7 +5,7 @@ import Sidebar from "../Layout/Sidebar.jsx";
 import upload_area from "../../../assets/back/upload_area.png";
 import { createProduct } from "../../services/productServices.js";
 
-const Dashboard= () => {
+const Dashboard = () => {
   const navigate = useNavigate();
 
   // =========================
@@ -41,6 +41,7 @@ const Dashboard= () => {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [serverError, setServerError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   const sizes = ["S", "M", "L", "XL", "XXL"];
 
@@ -98,7 +99,7 @@ const Dashboard= () => {
     setSelectedSizes((prev) =>
       prev.includes(size)
         ? prev.filter((item) => item !== size)
-        : [...prev, size]
+        : [...prev, size],
     );
 
     setErrors((prev) => ({
@@ -130,8 +131,7 @@ const Dashboard= () => {
     if (!formData.description.trim()) {
       newErrors.description = "Product description is required";
     } else if (formData.description.trim().length < 10) {
-      newErrors.description =
-        "Description must be at least 10 characters";
+      newErrors.description = "Description must be at least 10 characters";
     }
 
     if (!formData.price || Number(formData.price) <= 0) {
@@ -189,29 +189,17 @@ const Dashboard= () => {
 
       data.append("name", formData.name.trim());
 
-      data.append(
-        "description",
-        formData.description.trim()
-      );
+      data.append("description", formData.description.trim());
 
       data.append("category", formData.category);
 
-      data.append(
-        "subcategory",
-        formData.subcategory
-      );
+      data.append("subcategory", formData.subcategory);
 
       data.append("price", formData.price);
 
-      data.append(
-        "size",
-        JSON.stringify(selectedSizes)
-      );
+      data.append("size", JSON.stringify(selectedSizes));
 
-      data.append(
-        "bestseller",
-        String(formData.bestseller)
-      );
+      data.append("bestseller", String(formData.bestseller));
 
       // =========================
       // SEND TO BACKEND
@@ -222,7 +210,8 @@ const Dashboard= () => {
       console.log("CREATE PRODUCT RESPONSE:", response.data);
 
       if (response.data?.success) {
-        alert("Product added successfully!");
+        // alert("Product added successfully!");
+        setSuccessMessage("Product added successfully!");
 
         // Reset form
         setImages({
@@ -254,21 +243,15 @@ const Dashboard= () => {
         // Go to product list
         navigate("/ProductList");
       } else {
-        setServerError(
-          response.data?.message ||
-            "Failed to add product."
-        );
+        setServerError(response.data?.message || "Failed to add product.");
       }
     } catch (error) {
-      console.error(
-        "CREATE PRODUCT ERROR:",
-        error
-      );
+      console.error("CREATE PRODUCT ERROR:", error);
 
       setServerError(
         error.response?.data?.message ||
           error.response?.data?.error ||
-          "Unable to add product. Please try again."
+          "Unable to add product. Please try again.",
       );
     } finally {
       setLoading(false);
@@ -287,36 +270,25 @@ const Dashboard= () => {
 
         {/* CONTENT */}
         <div className="col-9 col-sm-9 col-md-9 col-lg-10 border-start border-3">
-          <form
-            onSubmit={handleSubmit}
-            className="p-3 p-md-4"
-          >
+          <form onSubmit={handleSubmit} className="p-3 p-md-4">
             {/* =========================
                 UPLOAD IMAGES
             ========================= */}
             <h5>Upload Images</h5>
 
             <p className="text-muted small">
-              First image is the main image. At least 2
-              images are required.
+              First image is the main image. At least 2 images are required.
             </p>
 
             <div className="d-flex gap-2 gap-md-3 flex-wrap mb-2">
-              {[
-                "image1",
-                "image2",
-                "image3",
-                "image4",
-              ].map((key, index) => (
+              {["image1", "image2", "image3", "image4"].map((key, index) => (
                 <label
                   key={key}
                   className="text-center"
                   style={{ cursor: "pointer" }}
                 >
                   <img
-                    src={
-                      preview[key] || upload_area
-                    }
+                    src={preview[key] || upload_area}
                     alt={`Upload ${index + 1}`}
                     className="img-fluid"
                     style={{
@@ -325,9 +297,7 @@ const Dashboard= () => {
                       objectFit: "cover",
                       borderStyle: "dotted",
                       borderWidth: "1.5px",
-                      borderColor: errors[key]
-                        ? "red"
-                        : "#d1d5db",
+                      borderColor: errors[key] ? "red" : "#d1d5db",
                     }}
                   />
 
@@ -335,24 +305,18 @@ const Dashboard= () => {
                     type="file"
                     accept="image/*"
                     hidden
-                    onChange={(e) =>
-                      handleImageChange(e, key)
-                    }
+                    onChange={(e) => handleImageChange(e, key)}
                   />
                 </label>
               ))}
             </div>
 
             {errors.image1 && (
-              <div className="text-danger small mb-2">
-                {errors.image1}
-              </div>
+              <div className="text-danger small mb-2">{errors.image1}</div>
             )}
 
             {errors.image2 && (
-              <div className="text-danger small mb-2">
-                {errors.image2}
-              </div>
+              <div className="text-danger small mb-2">{errors.image2}</div>
             )}
 
             {/* =========================
@@ -374,9 +338,7 @@ const Dashboard= () => {
               />
 
               {errors.name && (
-                <div className="text-danger small">
-                  {errors.name}
-                </div>
+                <div className="text-danger small">{errors.name}</div>
               )}
             </div>
 
@@ -399,9 +361,7 @@ const Dashboard= () => {
               />
 
               {errors.description && (
-                <div className="text-danger small">
-                  {errors.description}
-                </div>
+                <div className="text-danger small">{errors.description}</div>
               )}
             </div>
 
@@ -417,9 +377,7 @@ const Dashboard= () => {
               <div className="row g-3">
                 {/* CATEGORY */}
                 <div className="col-12 col-md-4">
-                  <label className="form-label fs-5">
-                    Product Category
-                  </label>
+                  <label className="form-label fs-5">Product Category</label>
 
                   <select
                     name="category"
@@ -427,25 +385,17 @@ const Dashboard= () => {
                     onChange={handleChange}
                     className="form-select form-select-lg"
                   >
-                    <option value="Men">
-                      Men
-                    </option>
+                    <option value="Men">Men</option>
 
-                    <option value="Women">
-                      Women
-                    </option>
+                    <option value="Women">Women</option>
 
-                    <option value="Kids">
-                      Kids
-                    </option>
+                    <option value="Kids">Kids</option>
                   </select>
                 </div>
 
                 {/* SUBCATEGORY */}
                 <div className="col-12 col-md-4">
-                  <label className="form-label fs-5">
-                    Sub Category
-                  </label>
+                  <label className="form-label fs-5">Sub Category</label>
 
                   <select
                     name="subcategory"
@@ -453,25 +403,17 @@ const Dashboard= () => {
                     onChange={handleChange}
                     className="form-select form-select-lg"
                   >
-                    <option value="Topwear">
-                      Topwear
-                    </option>
+                    <option value="Topwear">Topwear</option>
 
-                    <option value="Bottomwear">
-                      Bottomwear
-                    </option>
+                    <option value="Bottomwear">Bottomwear</option>
 
-                    <option value="Footwear">
-                      Footwear
-                    </option>
+                    <option value="Footwear">Footwear</option>
                   </select>
                 </div>
 
                 {/* PRICE */}
                 <div className="col-12 col-md-4">
-                  <label className="form-label fs-5">
-                    Product Price
-                  </label>
+                  <label className="form-label fs-5">Product Price</label>
 
                   <input
                     type="number"
@@ -485,9 +427,7 @@ const Dashboard= () => {
                   />
 
                   {errors.price && (
-                    <div className="text-danger small">
-                      {errors.price}
-                    </div>
+                    <div className="text-danger small">{errors.price}</div>
                   )}
                 </div>
               </div>
@@ -496,22 +436,16 @@ const Dashboard= () => {
                   SIZES
               ========================= */}
               <div className="mt-4">
-                <label className="form-label fs-5 d-block">
-                  Product Sizes
-                </label>
+                <label className="form-label fs-5 d-block">Product Sizes</label>
 
                 <div className="d-flex flex-wrap gap-2">
                   {sizes.map((size) => (
                     <button
                       key={size}
                       type="button"
-                      onClick={() =>
-                        toggleSize(size)
-                      }
+                      onClick={() => toggleSize(size)}
                       className={`btn rounded-0 px-4 py-2 ${
-                        selectedSizes.includes(size)
-                          ? "btn-dark"
-                          : "btn-light"
+                        selectedSizes.includes(size) ? "btn-dark" : "btn-light"
                       }`}
                     >
                       {size}
@@ -520,9 +454,7 @@ const Dashboard= () => {
                 </div>
 
                 {errors.sizes && (
-                  <div className="text-danger small mt-1">
-                    {errors.sizes}
-                  </div>
+                  <div className="text-danger small mt-1">{errors.sizes}</div>
                 )}
               </div>
 
@@ -539,10 +471,7 @@ const Dashboard= () => {
                   onChange={handleChange}
                 />
 
-                <label
-                  className="form-check-label fs-5"
-                  htmlFor="bestseller"
-                >
+                <label className="form-check-label fs-5" htmlFor="bestseller">
                   Add to bestseller
                 </label>
               </div>
@@ -551,14 +480,28 @@ const Dashboard= () => {
                   SERVER ERROR
               ========================= */}
               {serverError && (
-                <div className="alert alert-danger mt-3">
-                  {serverError}
-                </div>
+                <div className="alert alert-danger mt-3">{serverError}</div>
               )}
 
               {/* =========================
                   ADD BUTTON
               ========================= */}
+
+              {successMessage && (
+                <div
+                  className="alert alert-success alert-dismissible fade show mt-3"
+                  role="alert"
+                >
+                  <strong>Success!</strong> {successMessage}
+                  <button
+                    type="button"
+                    className="btn-close"
+                    onClick={() => setSuccessMessage("")}
+                    aria-label="Close"
+                  ></button>
+                </div>
+              )}
+
               <button
                 type="submit"
                 disabled={loading}
@@ -574,4 +517,4 @@ const Dashboard= () => {
   );
 };
 
-export default Dashboard
+export default Dashboard;

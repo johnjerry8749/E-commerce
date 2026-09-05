@@ -30,10 +30,13 @@ export const protect = (req, res, next) => {
 
     next();
 
-  } catch (error) {
-    return res.status(401).json({
-      success: false,
-      message: "Not Authorized, Token failed",
-    });
-  }
+  }catch (error) {
+  console.error("JWT ERROR:", error.message);
+
+  return res.status(401).json({
+    success: false,
+    message: "Not Authorized, Token failed",
+    error: error.message,
+  });
+}
 };

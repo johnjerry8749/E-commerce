@@ -5,15 +5,23 @@ const api = axios.create({
   withCredentials: true,
 });
 
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token");
 
-//Auto Attach JWT Token
+    console.log("TOKEN:", token);
+    console.log("REQUEST:", config.method, config.url);
 
-api.interceptors.request.use((config) => {
-  const token= localStorage.getItem("token");
-  if(!token){
-    config.headers.Authorization = `Bearer${token}`;
-  }
-  return config;
-})
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+      console.log("AUTH HEADER:", config.headers.Authorization);
+    } else {
+      console.log("NO TOKEN FOUND");
+    }
+
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 export default api;

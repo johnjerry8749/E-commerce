@@ -9,6 +9,73 @@ import {
 } from "../models/Product.js";
 
 // ========================================
+// PARSE PRODUCT SIZES
+// ========================================
+const parseSizes = (size) => {
+  if (!size) {
+    return [];
+  }
+
+  // Already an array
+  if (Array.isArray(size)) {
+    return [
+      ...new Set(
+        size
+          .map((item) => String(item).trim())
+          .filter(Boolean)
+      ),
+    ];
+  }
+
+  // JSON string
+  if (typeof size === "string") {
+    try {
+      const parsed = JSON.parse(size);
+
+      if (Array.isArray(parsed)) {
+        return [
+          ...new Set(
+            parsed
+              .map((item) => String(item).trim())
+              .filter(Boolean)
+          ),
+        ];
+      }
+
+      if (parsed) {
+        return [String(parsed).trim()];
+      }
+    } catch {
+      // Continue below
+    }
+
+    // Comma-separated string
+    return [
+      ...new Set(
+        size
+          .split(",")
+          .map((item) => item.trim())
+          .filter(Boolean)
+      ),
+    ];
+  }
+
+  return [];
+};
+
+// ========================================
+// CONVERT BESTSELLER TO BOOLEAN
+// ========================================
+const parseBestseller = (bestseller) => {
+  return (
+    bestseller === true ||
+    bestseller === "true" ||
+    bestseller === "on" ||
+    bestseller === "1"
+  );
+};
+
+// ========================================
 // CREATE PRODUCT
 // ========================================
 export const createProduct = async (req, res) => {
@@ -23,17 +90,29 @@ export const createProduct = async (req, res) => {
       bestseller,
     } = req.body;
 
-    // ===== Images from multer fields =====
-    if (!req.files || !req.files.mainImage || !req.files.mainImage[0]) {
+    // ========================================
+    // MAIN IMAGE
+    // ========================================
+    if (
+      !req.files ||
+      !req.files.mainImage ||
+      !req.files.mainImage[0]
+    ) {
       return res.status(400).json({
         success: false,
         message: "Main image is required",
       });
     }
 
-    const mainImageUrl = req.files.mainImage[0].path;
+    const mainImageUrl =
+      req.files.mainImage[0].path;
 
-    const otherImages = req.files.otherImages || [];
+    // ========================================
+    // OTHER IMAGES
+    // ========================================
+    const otherImages =
+      req.files.otherImages || [];
+
     if (otherImages.length < 1) {
       return res.status(400).json({
         success: false,
@@ -41,34 +120,36 @@ export const createProduct = async (req, res) => {
       });
     }
 
-    const otherImageUrls = otherImages.map((file) => file.path);
-
-    // Parse size (JSON array)
-    let parsedSize = size;
-    try {
-      parsedSize = JSON.parse(size);
-    } catch {
-      // already a string or array – leave as is
-    }
-
-    // Convert bestseller to boolean
-    const isBestseller =
-      bestseller === true ||
-      bestseller === "true" ||
-      bestseller === "on" ||
-      bestseller === "1";
-
-    const newProduct = await createProductModel(
-      name,
-      description,
-      price,
-      category,
-      subcategory,
-      parsedSize,          // array or string
-      isBestseller,
-      mainImageUrl,
-      otherImageUrls
+    const otherImageUrls = otherImages.map(
+      (file) => file.path
     );
+
+    // ========================================
+    // PARSE SIZES
+    // ========================================
+    const parsedSize = parseSizes(size);
+
+    // ========================================
+    // BESTSELLER
+    // ========================================
+    const isBestseller =
+      parseBestseller(bestseller);
+
+    // ========================================
+    // CREATE PRODUCT
+    // ========================================
+    const newProduct =
+      await createProductModel(
+        name,
+        description,
+        price,
+        category,
+        subcategory,
+        parsedSize,
+        isBestseller,
+        mainImageUrl,
+        otherImageUrls
+      );
 
     return res.status(201).json({
       success: true,
@@ -76,7 +157,11 @@ export const createProduct = async (req, res) => {
       product: newProduct,
     });
   } catch (error) {
-    console.error("Create Product Error:", error);
+    console.error(
+      "Create Product Error:",
+      error
+    );
+
     return res.status(500).json({
       success: false,
       message: "Server error",
@@ -90,11 +175,18 @@ export const createProduct = async (req, res) => {
 // ========================================
 export const getProducts = async (req, res) => {
   try {
-    const { category, subcategory } = req.query;
+    const {
+      category,
+      subcategory,
+    } = req.query;
 
     let products;
+
     if (category || subcategory) {
-      products = await filterProducts({ category, subcategory });
+      products = await filterProducts({
+        category,
+        subcategory,
+      });
     } else {
       products = await getAllProducts();
     }
@@ -104,7 +196,11 @@ export const getProducts = async (req, res) => {
       products,
     });
   } catch (error) {
-    console.error("Get Products Error:", error);
+    console.error(
+      "Get Products Error:",
+      error
+    );
+
     return res.status(500).json({
       success: false,
       message: "Server error",
@@ -119,7 +215,9 @@ export const getProducts = async (req, res) => {
 export const getProduct = async (req, res) => {
   try {
     const { id } = req.params;
-    const product = await getProductById(id);
+
+    const product =
+      await getProductById(id);
 
     if (!product) {
       return res.status(404).json({
@@ -133,7 +231,11 @@ export const getProduct = async (req, res) => {
       product,
     });
   } catch (error) {
-    console.error("Get Product Error:", error);
+    console.error(
+      "Get Product Error:",
+      error
+    );
+
     return res.status(500).json({
       success: false,
       message: "Server error",
@@ -157,40 +259,55 @@ export const updateProduct = async (req, res) => {
       bestseller,
     } = req.body;
 
+    // ========================================
+    // MAIN IMAGE
+    // ========================================
     let mainImage = null;
-    let otherImages = null;
 
     if (req.files?.mainImage?.[0]) {
-      mainImage = req.files.mainImage[0].path;
+      mainImage =
+        req.files.mainImage[0].path;
     }
+
+    // ========================================
+    // OTHER IMAGES
+    // ========================================
+    let otherImages = null;
+
     if (req.files?.otherImages?.length) {
-      otherImages = req.files.otherImages.map((f) => f.path);
+      otherImages =
+        req.files.otherImages.map(
+          (file) => file.path
+        );
     }
 
-    let parsedSize = size;
-    try {
-      parsedSize = JSON.parse(size);
-    } catch {
-      // leave as is
-    }
+    // ========================================
+    // PARSE SIZES
+    // ========================================
+    const parsedSize = parseSizes(size);
 
-    const isBestseller =bestseller === true ||
-      bestseller === "true" ||
-      bestseller === "on" ||
-      bestseller === "1";
+    // ========================================
+    // BESTSELLER
+    // ========================================
+    const isBestseller =
+      parseBestseller(bestseller);
 
-    const product = await updateProductModel(
-      req.params.id,
-      name,
-      description,
-      price,
-      category,
-      subcategory,
-      parsedSize,
-      isBestseller,
-      mainImage,
-      otherImages
-    );
+    // ========================================
+    // UPDATE PRODUCT
+    // ========================================
+    const product =
+      await updateProductModel(
+        req.params.id,
+        name,
+        description,
+        price,
+        category,
+        subcategory,
+        parsedSize,
+        isBestseller,
+        mainImage,
+        otherImages
+      );
 
     if (!product) {
       return res.status(404).json({
@@ -205,7 +322,11 @@ export const updateProduct = async (req, res) => {
       product,
     });
   } catch (error) {
-    console.error("Update Product Error:", error);
+    console.error(
+      "Update Product Error:",
+      error
+    );
+
     return res.status(500).json({
       success: false,
       message: "Server error",
@@ -220,7 +341,9 @@ export const updateProduct = async (req, res) => {
 export const deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
-    const product = await deleteProductModel(id);
+
+    const product =
+      await deleteProductModel(id);
 
     if (!product) {
       return res.status(404).json({
@@ -234,7 +357,11 @@ export const deleteProduct = async (req, res) => {
       message: "Product deleted successfully",
     });
   } catch (error) {
-    console.error("Delete Product Error:", error);
+    console.error(
+      "Delete Product Error:",
+      error
+    );
+
     return res.status(500).json({
       success: false,
       message: "Server error",
@@ -249,12 +376,17 @@ export const deleteProduct = async (req, res) => {
 export const getBestSellers = async (req, res) => {
   try {
     const products = await bestSellers();
+
     return res.status(200).json({
       success: true,
       products,
     });
   } catch (error) {
-    console.error("Best Sellers Error:", error);
+    console.error(
+      "Best Sellers Error:",
+      error
+    );
+
     return res.status(500).json({
       success: false,
       message: "Server error",
