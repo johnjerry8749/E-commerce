@@ -1,22 +1,23 @@
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+
 import add_icon from "../../../assets/back/add_icon.png";
 import order_icon from "../../../assets/back/order_icon.png";
-import { useState } from "react";
+import file_person from "../../../assets/back/file_person.svg";
+import file_text from "../../../assets/back/file_text.svg";
+import gear from "../../../assets/back/gear.svg";
 
 const Sidebar = () => {
   const navigate = useNavigate();
+
   const [active, setActive] = useState("Add Items");
 
-  const AddProductpage = () => {
-    navigate("/AuthDashboard/AddProducts");
-  };
-
-  const OrderListpage = () => {
-    navigate("/AuthDashboard/AddProducts");
-  };
-
-  const Orderpage = () => {
-    navigate("/AuthDashboard/AddProducts");
+  // =========================
+  // HANDLE NAVIGATION
+  // =========================
+  const handleNavigation = (name, path) => {
+    setActive(name);
+    navigate(path);
   };
 
   return (
@@ -24,16 +25,25 @@ const Sidebar = () => {
       <div className="ms-4 mt-4">
         <div className="ms-3">
           <div className="d-flex flex-column gap-3">
-            {/* ADD ITEMS */}
+
+            {/* =========================
+                ADD ITEMS
+            ========================= */}
             <div
-              onClick={() => setActive("Add Items")}
+              onClick={() =>
+                handleNavigation(
+                  "Add Items",
+                  "/AuthDashboard/AddProducts"
+                )
+              }
               className={`p-2 ps-3 border border-end-0 rounded-start d-flex align-items-center gap-2 ${
                 active === "Add Items"
                   ? "bg-secondary text-white"
                   : "bg-white text-dark"
               }`}
-              style={{ cursor: "pointer" }}
-              onclick={AddProductpage}
+              style={{
+                cursor: "pointer",
+              }}
             >
               <img
                 src={add_icon}
@@ -44,22 +54,34 @@ const Sidebar = () => {
                 }}
               />
 
-              <p className="mb-0 d-none d-lg-block text-dark d-xl-block">Add Items</p>
+              <p
+                className="mb-0 d-none d-lg-block d-xl-block text-dark"
+              >
+                Add Items
+              </p>
             </div>
 
-            {/* LIST ITEMS */}
+            {/* =========================
+                LIST ITEMS
+            ========================= */}
             <div
-              onClick={() => setActive("List Items")}
+              onClick={() =>
+                handleNavigation(
+                  "List Items",
+                  "/AuthDashboard/ProductLists"
+                )
+              }
               className={`p-2 ps-3 border border-end-0 rounded-start d-flex align-items-center gap-2 ${
                 active === "List Items"
                   ? "bg-secondary text-white"
                   : "bg-white text-dark"
               }`}
-              style={{ cursor: "pointer" }}
-              onclick={OrderListpage}
+              style={{
+                cursor: "pointer",
+              }}
             >
               <img
-                src={order_icon}
+                src={file_text}
                 alt="List Items"
                 style={{
                   height: "20px",
@@ -67,19 +89,31 @@ const Sidebar = () => {
                 }}
               />
 
-              <p className="mb-0 d-none d-lg-block text-dark d-xl-block">List Items</p>
+              <p
+                className="mb-0 d-none d-lg-block d-xl-block text-dark"
+              >
+                List Items
+              </p>
             </div>
 
-            {/* ORDERS */}
+            {/* =========================
+                ORDERS
+            ========================= */}
             <div
-              onClick={() => setActive("Orders")}
+              onClick={() =>
+                handleNavigation(
+                  "Orders",
+                  "/AuthDashboard/Orders"
+                )
+              }
               className={`p-2 ps-3 border border-end-0 rounded-start d-flex align-items-center gap-2 ${
                 active === "Orders"
                   ? "bg-secondary text-white"
                   : "bg-white text-dark"
               }`}
-              style={{ cursor: "pointer" }}
-              onclick={Orderpage}
+              style={{
+                cursor: "pointer",
+              }}
             >
               <img
                 src={order_icon}
@@ -90,8 +124,83 @@ const Sidebar = () => {
                 }}
               />
 
-              <p className="mb-0 d-none text-dark d-lg-block d-xl-block">Orders</p>
+              <p
+                className="mb-0 d-none d-lg-block d-xl-block text-dark"
+              >
+                Orders
+              </p>
             </div>
+
+            {/* =========================
+                USERS
+            ========================= */}
+            <div
+              onClick={() =>
+                handleNavigation(
+                  "Users",
+                  "/AuthDashboard/UserLists"
+                )
+              }
+              className={`p-2 ps-3 border border-end-0 rounded-start d-flex align-items-center gap-2 ${
+                active === "Users"
+                  ? "bg-secondary text-white"
+                  : "bg-white text-dark"
+              }`}
+              style={{
+                cursor: "pointer",
+              }}
+            >
+              <img
+                src={file_person}
+                alt="Users"
+                style={{
+                  height: "20px",
+                  width: "20px",
+                }}
+              />
+
+              <p
+                className="mb-0 d-none d-lg-block d-xl-block text-dark"
+              >
+                Users
+              </p>
+            </div>
+
+            {/* =========================
+                SETTINGS
+            ========================= */}
+            <div
+              onClick={() =>
+                handleNavigation(
+                  "Settings",
+                  "/AuthDashboard/AdminSettings"
+                )
+              }
+              className={`p-2 ps-3 border border-end-0 rounded-start d-flex align-items-center gap-2 ${
+                active === "Settings"
+                  ? "bg-secondary text-white"
+                  : "bg-white text-dark"
+              }`}
+              style={{
+                cursor: "pointer",
+              }}
+            >
+              <img
+                src={gear}
+                alt="Settings"
+                style={{
+                  height: "20px",
+                  width: "20px",
+                }}
+              />
+
+              <p
+                className="mb-0 d-none d-lg-block d-xl-block text-dark"
+              >
+                Settings
+              </p>
+            </div>
+
           </div>
         </div>
       </div>

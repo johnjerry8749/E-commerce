@@ -14,7 +14,9 @@ import AuthisAdmin from "./components/admin/pages/Users/AdminLogin.jsx";
 import AuthDashboard from "./components/admin/pages/Dashboard.jsx";
 import AddProduct from "./components/admin/pages/Product/AddProduct.jsx";
 import ProductList from "./components/admin/pages/Product/ProductList.jsx";
-import EditProduct from "./components/admin/pages/Product/EditProduct.jsx";
+import Orders from "./components/admin/pages/Orders/OrderList.jsx"
+import UserList from "./components/admin/pages/Users/UserList.jsx";
+import Adminsettings from "./components/admin/pages/Adminsettings.jsx";
 
 const ProtectedAdminRoute = ({ children }) => {
   const { isAuthenticated, isAdmin, loading } = useAuth();
@@ -71,7 +73,7 @@ const App = () => {
           }
         />
         <Route
-          path="/AuthDashboard/ProductList"
+          path="/AuthDashboard/ProductLists"
           element={
             <ProtectedAdminRoute>
               <ProductList />
@@ -79,13 +81,32 @@ const App = () => {
           }
         />
         <Route
-          path="/AuthDashboard/EditProduct"
+          path="/AuthDashboard/Orders"
           element={
             <ProtectedAdminRoute>
-              <EditProduct />
+              <Orders />
             </ProtectedAdminRoute>
           }
         />
+
+         <Route
+          path="/AuthDashboard/UserLists"
+          element={
+            <ProtectedAdminRoute>
+              <UserList />
+            </ProtectedAdminRoute>
+          }
+        />
+
+        <Route
+          path="/AuthDashboard/AdminSettings"
+          element={
+            <ProtectedAdminRoute>
+              <Adminsettings />
+            </ProtectedAdminRoute>
+          }
+        />
+
       </Routes>
     </div>
   );
