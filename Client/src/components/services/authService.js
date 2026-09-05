@@ -9,5 +9,5 @@ export const registerUser = async (payload) => {
 };
 
 export const adminLogin = async (payload) => {
-  return api.post("/admin/login", payload);
+  return api.post("/auth/admin-login", payload);
 };
