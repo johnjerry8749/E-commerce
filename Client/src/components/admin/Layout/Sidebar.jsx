@@ -1,5 +1,4 @@
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 
 import add_icon from "../../../assets/back/add_icon.png";
 import order_icon from "../../../assets/back/order_icon.png";
@@ -9,15 +8,20 @@ import gear from "../../../assets/back/gear.svg";
 
 const Sidebar = () => {
   const navigate = useNavigate();
-
-  const [active, setActive] = useState("Add Items");
+  const location = useLocation();
 
   // =========================
   // HANDLE NAVIGATION
   // =========================
-  const handleNavigation = (name, path) => {
-    setActive(name);
+  const handleNavigation = (path) => {
     navigate(path);
+  };
+
+  // =========================
+  // CHECK ACTIVE ROUTE
+  // =========================
+  const isActive = (path) => {
+    return location.pathname === path;
   };
 
   return (
@@ -31,19 +35,14 @@ const Sidebar = () => {
             ========================= */}
             <div
               onClick={() =>
-                handleNavigation(
-                  "Add Items",
-                  "/AuthDashboard/AddProducts"
-                )
+                handleNavigation("/AuthDashboard/AddProducts")
               }
               className={`p-2 ps-3 border border-end-0 rounded-start d-flex align-items-center gap-2 ${
-                active === "Add Items"
+                isActive("/AuthDashboard/AddProducts")
                   ? "bg-secondary text-white"
                   : "bg-white text-dark"
               }`}
-              style={{
-                cursor: "pointer",
-              }}
+              style={{ cursor: "pointer" }}
             >
               <img
                 src={add_icon}
@@ -55,7 +54,11 @@ const Sidebar = () => {
               />
 
               <p
-                className="mb-0 d-none d-lg-block d-xl-block text-dark"
+                className={`mb-0 d-none d-lg-block d-xl-block ${
+                  isActive("/AuthDashboard/AddProducts")
+                    ? "text-white"
+                    : "text-dark"
+                }`}
               >
                 Add Items
               </p>
@@ -66,19 +69,14 @@ const Sidebar = () => {
             ========================= */}
             <div
               onClick={() =>
-                handleNavigation(
-                  "List Items",
-                  "/AuthDashboard/ProductLists"
-                )
+                handleNavigation("/AuthDashboard/ProductLists")
               }
               className={`p-2 ps-3 border border-end-0 rounded-start d-flex align-items-center gap-2 ${
-                active === "List Items"
+                isActive("/AuthDashboard/ProductLists")
                   ? "bg-secondary text-white"
                   : "bg-white text-dark"
               }`}
-              style={{
-                cursor: "pointer",
-              }}
+              style={{ cursor: "pointer" }}
             >
               <img
                 src={file_text}
@@ -90,7 +88,11 @@ const Sidebar = () => {
               />
 
               <p
-                className="mb-0 d-none d-lg-block d-xl-block text-dark"
+                className={`mb-0 d-none d-lg-block d-xl-block ${
+                  isActive("/AuthDashboard/ProductLists")
+                    ? "text-white"
+                    : "text-dark"
+                }`}
               >
                 List Items
               </p>
@@ -101,19 +103,14 @@ const Sidebar = () => {
             ========================= */}
             <div
               onClick={() =>
-                handleNavigation(
-                  "Orders",
-                  "/AuthDashboard/Orders"
-                )
+                handleNavigation("/AuthDashboard/Orders")
               }
               className={`p-2 ps-3 border border-end-0 rounded-start d-flex align-items-center gap-2 ${
-                active === "Orders"
+                isActive("/AuthDashboard/Orders")
                   ? "bg-secondary text-white"
                   : "bg-white text-dark"
               }`}
-              style={{
-                cursor: "pointer",
-              }}
+              style={{ cursor: "pointer" }}
             >
               <img
                 src={order_icon}
@@ -125,7 +122,11 @@ const Sidebar = () => {
               />
 
               <p
-                className="mb-0 d-none d-lg-block d-xl-block text-dark"
+                className={`mb-0 d-none d-lg-block d-xl-block ${
+                  isActive("/AuthDashboard/Orders")
+                    ? "text-white"
+                    : "text-dark"
+                }`}
               >
                 Orders
               </p>
@@ -136,19 +137,14 @@ const Sidebar = () => {
             ========================= */}
             <div
               onClick={() =>
-                handleNavigation(
-                  "Users",
-                  "/AuthDashboard/UserLists"
-                )
+                handleNavigation("/AuthDashboard/UserLists")
               }
               className={`p-2 ps-3 border border-end-0 rounded-start d-flex align-items-center gap-2 ${
-                active === "Users"
+                isActive("/AuthDashboard/UserLists")
                   ? "bg-secondary text-white"
                   : "bg-white text-dark"
               }`}
-              style={{
-                cursor: "pointer",
-              }}
+              style={{ cursor: "pointer" }}
             >
               <img
                 src={file_person}
@@ -160,7 +156,11 @@ const Sidebar = () => {
               />
 
               <p
-                className="mb-0 d-none d-lg-block d-xl-block text-dark"
+                className={`mb-0 d-none d-lg-block d-xl-block ${
+                  isActive("/AuthDashboard/UserLists")
+                    ? "text-white"
+                    : "text-dark"
+                }`}
               >
                 Users
               </p>
@@ -171,19 +171,14 @@ const Sidebar = () => {
             ========================= */}
             <div
               onClick={() =>
-                handleNavigation(
-                  "Settings",
-                  "/AuthDashboard/AdminSettings"
-                )
+                handleNavigation("/AuthDashboard/AdminSettings")
               }
               className={`p-2 ps-3 border border-end-0 rounded-start d-flex align-items-center gap-2 ${
-                active === "Settings"
+                isActive("/AuthDashboard/AdminSettings")
                   ? "bg-secondary text-white"
                   : "bg-white text-dark"
               }`}
-              style={{
-                cursor: "pointer",
-              }}
+              style={{ cursor: "pointer" }}
             >
               <img
                 src={gear}
@@ -195,7 +190,11 @@ const Sidebar = () => {
               />
 
               <p
-                className="mb-0 d-none d-lg-block d-xl-block text-dark"
+                className={`mb-0 d-none d-lg-block d-xl-block ${
+                  isActive("/AuthDashboard/AdminSettings")
+                    ? "text-white"
+                    : "text-dark"
+                }`}
               >
                 Settings
               </p>
