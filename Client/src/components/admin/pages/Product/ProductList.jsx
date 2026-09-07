@@ -425,7 +425,7 @@ const ProductList = () => {
         {/* =========================
             SIDEBAR
         ========================= */}
-        <div className="col-3 col-sm-3 col-md-3 col-lg-2">
+        <div className="col-2 col-sm-2 col-md-3 col-lg-2">
           <Sidebar />
         </div>
 
