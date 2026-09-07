@@ -22,8 +22,8 @@ const Sidebar = () => {
 
   return (
     <div className="sidebar">
-      <div className="ms-4 mt-4">
-        <div className="ms-3">
+      <div className="ms-0 mt-4">
+        <div className="ms-2">
           <div className="d-flex flex-column gap-3">
 
             {/* =========================
