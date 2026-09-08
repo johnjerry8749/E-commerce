@@ -1,6 +1,7 @@
 import Footer from "../common/Footer";
 import Navbar from "../common/Navbar";
 import { useCart } from "../context/CartContext";
+import { useNavigate } from "react-router-dom";
 
 const Cart = () => {
   const {
@@ -13,6 +14,11 @@ const Cart = () => {
 
   const shippingFee = cartItems.length > 0 ? 10 : 0;
   const total = totalPrice + shippingFee;
+
+  const navigate = useNavigate();
+  const handlechekout = (path) => {
+    navigate(path)
+  }
 
   return (
     <div>
@@ -262,7 +268,7 @@ const Cart = () => {
                     maxWidth: "342px",
                     fontSize: "18px",
                   }}
-                >
+                onClick= {() => (handlechekout("/Checkout"))} >
                   PROCEED TO CHECKOUT
                 </button>
 

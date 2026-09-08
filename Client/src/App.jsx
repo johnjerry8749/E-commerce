@@ -9,37 +9,18 @@ import About from "./components/pages/About.jsx";
 import Cart from "./components/pages/Cart.jsx";
 import Login from "./components/pages/Login.jsx";
 import Register from "./components/pages/Register.jsx";
+import Checkout from "./components/pages/Checkout.jsx";
 
 import AuthisAdmin from "./components/admin/pages/Users/AdminLogin.jsx";
 import AuthDashboard from "./components/admin/pages/Dashboard.jsx";
 import AddProduct from "./components/admin/pages/Product/AddProduct.jsx";
 import ProductList from "./components/admin/pages/Product/ProductList.jsx";
-import Orders from "./components/admin/pages/Orders/OrderList.jsx"
+import Orders from "./components/admin/pages/Orders/OrderList.jsx";
 import UserList from "./components/admin/pages/Users/UserList.jsx";
 import Adminsettings from "./components/admin/pages/Adminsettings.jsx";
 
-const ProtectedAdminRoute = ({ children }) => {
-  const { isAuthenticated, isAdmin, loading } = useAuth();
-
-  // Wait until AuthContext has finished reading localStorage
-  if (loading) {
-    return (
-      <div className="d-flex justify-content-center align-items-center min-vh-100">
-        Loading...
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return <Navigate to="/AuthisAdmin" replace />;
-  }
-
-  if (!isAdmin) {
-    return <Navigate to="/" replace />;
-  }
-
-  return children;
-};
+import ProtectedAdminRoute from "./components/hook/AdminProtectedRoute.jsx";
+import ProtectedUserRoute from "./components/hook/AdminProtectedRoute.jsx";
 
 const App = () => {
   return (
@@ -53,9 +34,19 @@ const App = () => {
         <Route path="/Cart" element={<Cart />} />
         <Route path="/Login" element={<Login />} />
         <Route path="/Register" element={<Register />} />
-
         <Route path="/AuthisAdmin" element={<AuthisAdmin />} />
 
+        
+        //================= //PROTECTED USER ROUTES //=================
+        <Route
+          path="/Checkout"
+          element={
+            <ProtectedUserRoute>
+              <Checkout />
+            </ProtectedUserRoute>
+          }
+        />
+        //================= //PROTECTED ADMIN ROUTES //=================
         <Route
           path="/AuthDashboard"
           element={
@@ -88,8 +79,7 @@ const App = () => {
             </ProtectedAdminRoute>
           }
         />
-
-         <Route
+        <Route
           path="/AuthDashboard/UserLists"
           element={
             <ProtectedAdminRoute>
@@ -97,7 +87,6 @@ const App = () => {
             </ProtectedAdminRoute>
           }
         />
-
         <Route
           path="/AuthDashboard/AdminSettings"
           element={
@@ -106,7 +95,6 @@ const App = () => {
             </ProtectedAdminRoute>
           }
         />
-
       </Routes>
     </div>
   );
