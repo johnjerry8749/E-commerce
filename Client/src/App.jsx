@@ -1,6 +1,8 @@
-import { Navigate, Route, Routes } from "react-router-dom";
-import { useAuth } from "./components/context/AuthContext.jsx";
+import { Route, Routes } from "react-router-dom";
 
+// =========================
+// PUBLIC PAGES
+// =========================
 import AllHomecomponents from "./components/pages/AllHomecomponents.jsx";
 import ProductDetails from "./components/pages/ProductDetails.jsx";
 import Collections from "./components/pages/Collections.jsx";
@@ -11,6 +13,9 @@ import Login from "./components/pages/Login.jsx";
 import Register from "./components/pages/Register.jsx";
 import Checkout from "./components/pages/Checkout.jsx";
 
+// =========================
+// ADMIN PAGES
+// =========================
 import AuthisAdmin from "./components/admin/pages/Users/AdminLogin.jsx";
 import AuthDashboard from "./components/admin/pages/Dashboard.jsx";
 import AddProduct from "./components/admin/pages/Product/AddProduct.jsx";
@@ -19,25 +24,43 @@ import Orders from "./components/admin/pages/Orders/OrderList.jsx";
 import UserList from "./components/admin/pages/Users/UserList.jsx";
 import Adminsettings from "./components/admin/pages/Adminsettings.jsx";
 
+// =========================
+// PROTECTED ROUTES
+// =========================
 import ProtectedAdminRoute from "./components/hook/AdminProtectedRoute.jsx";
-import ProtectedUserRoute from "./components/hook/AdminProtectedRoute.jsx";
+import ProtectedUserRoute from "./components/hook/UserProtectedRoute.jsx";
 
 const App = () => {
   return (
     <div>
       <Routes>
+        {/* =========================
+            PUBLIC ROUTES
+        ========================= */}
+
         <Route path="/" element={<AllHomecomponents />} />
+
         <Route path="/productdetails/:id" element={<ProductDetails />} />
+
         <Route path="/Collections" element={<Collections />} />
+
         <Route path="/Contact" element={<Contact />} />
+
         <Route path="/About" element={<About />} />
+
         <Route path="/Cart" element={<Cart />} />
+
         <Route path="/Login" element={<Login />} />
+
         <Route path="/Register" element={<Register />} />
+
+        {/* Admin login is public */}
         <Route path="/AuthisAdmin" element={<AuthisAdmin />} />
 
-        
-        //================= //PROTECTED USER ROUTES //=================
+        {/* =========================
+            PROTECTED USER ROUTES
+        ========================= */}
+
         <Route
           path="/Checkout"
           element={
@@ -46,7 +69,11 @@ const App = () => {
             </ProtectedUserRoute>
           }
         />
-        //================= //PROTECTED ADMIN ROUTES //=================
+
+        {/* =========================
+            PROTECTED ADMIN ROUTES
+        ========================= */}
+
         <Route
           path="/AuthDashboard"
           element={
@@ -55,6 +82,7 @@ const App = () => {
             </ProtectedAdminRoute>
           }
         />
+
         <Route
           path="/AuthDashboard/AddProducts"
           element={
@@ -63,6 +91,7 @@ const App = () => {
             </ProtectedAdminRoute>
           }
         />
+
         <Route
           path="/AuthDashboard/ProductLists"
           element={
@@ -71,6 +100,7 @@ const App = () => {
             </ProtectedAdminRoute>
           }
         />
+
         <Route
           path="/AuthDashboard/Orders"
           element={
@@ -79,6 +109,7 @@ const App = () => {
             </ProtectedAdminRoute>
           }
         />
+
         <Route
           path="/AuthDashboard/UserLists"
           element={
@@ -87,6 +118,7 @@ const App = () => {
             </ProtectedAdminRoute>
           }
         />
+
         <Route
           path="/AuthDashboard/AdminSettings"
           element={
