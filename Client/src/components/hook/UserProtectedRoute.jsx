@@ -15,7 +15,8 @@ const ProtectedAdminRoute = ({ children }) => {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/AuthisAdmin" replace />;
+    alert("U must Login to Checkout")
+    return <Navigate to="/Login" replace />;
   }
 
   if (!user || user.role !== "admin") {

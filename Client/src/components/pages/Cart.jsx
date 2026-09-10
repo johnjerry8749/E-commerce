@@ -16,8 +16,9 @@ const Cart = () => {
   const total = totalPrice + shippingFee;
 
   const navigate = useNavigate();
-  const handlechekout = (path) => {
-    navigate(path)
+  const handlechekout = () => {
+    console.log("Checkout route clicked ")
+    navigate("/Checkout")
   }
 
   return (
@@ -268,7 +269,7 @@ const Cart = () => {
                     maxWidth: "342px",
                     fontSize: "18px",
                   }}
-                onClick= {() => (handlechekout("/Checkout"))} >
+                onClick= {handlechekout} >
                   PROCEED TO CHECKOUT
                 </button>
 

@@ -11,6 +11,12 @@ import About from "./components/pages/About.jsx";
 import Cart from "./components/pages/Cart.jsx";
 import Login from "./components/pages/Login.jsx";
 import Register from "./components/pages/Register.jsx";
+
+
+
+// =========================
+// USER AUTHENITCATED PAGES
+// =========================
 import Checkout from "./components/pages/Checkout.jsx";
 
 // =========================
