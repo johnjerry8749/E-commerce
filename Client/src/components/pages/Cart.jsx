@@ -17,8 +17,8 @@ const Cart = () => {
 
   const navigate = useNavigate();
   const handlechekout = () => {
-    console.log("Checkout route clicked ")
-    navigate("/Checkout")
+    console.log("Checkout route clicked")
+    navigate("/checkout")
   }
 
   return (

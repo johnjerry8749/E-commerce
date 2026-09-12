@@ -68,7 +68,7 @@ const App = () => {
         ========================= */}
 
         <Route
-          path="/Checkout"
+          path="/checkout"
           element={
             <ProtectedUserRoute>
               <Checkout />

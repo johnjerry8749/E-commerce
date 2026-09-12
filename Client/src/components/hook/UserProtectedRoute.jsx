@@ -1,29 +1,40 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
-const ProtectedAdminRoute = ({ children }) => {
-  const { user, isAuthenticated, loading } = useAuth();
+const UserProtectedRoute = ({ children }) => {
+  const { user, token, loading } = useAuth();
 
+  console.log("AUTH USER:", user);
+  console.log("USER ROLE:", user?.role);
+  console.log("TOKEN:", token);
+
+  // =========================
+  // WAIT FOR AUTH TO RESTORE
+  // =========================
   if (loading) {
     return (
-      <div className="d-flex justify-content-center align-items-center vh-100">
-        <div className="spinner-border text-primary" role="status">
+      <div className="container py-5 text-center">
+        <div className="spinner-border" role="status">
           <span className="visually-hidden">Loading...</span>
         </div>
+
+        <p className="mt-2">Loading...</p>
       </div>
     );
   }
 
-  if (!isAuthenticated) {
-    alert("U must Login to Checkout")
-    return <Navigate to="/Login" replace />;
+  // =========================
+  // USER NOT LOGGED IN
+  // =========================
+  if (!user || !token) {
+    return <Navigate to="/login" replace />;
   }
 
-  if (!user || user.role !== "admin") {
-    return <Navigate to="/" replace />;
-  }
-
+  // =========================
+  // USER IS LOGGED IN
+  // =========================
   return children;
 };
 
-export default ProtectedAdminRoute;
+export default UserProtectedRoute;
+
