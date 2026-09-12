@@ -2,13 +2,13 @@ import api from "./api";
 
 // Get currently logged-in user
 export const getMe = async () => {
-  const response = await api.get("/me");
+  const response = await api.get("/users/me");
   return response.data;
 };
 
 // Get user by ID - Admin only
 export const getUserById = async (id) => {
-  const response = await api.get(`/me/${id}`);
+  const response = await api.get(`/users/me/${id}`);
   return response.data;
 };
 

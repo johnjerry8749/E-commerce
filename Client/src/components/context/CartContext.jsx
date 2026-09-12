@@ -1,25 +1,59 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
-  const [cartItems, setCartItems] = useState([]);
+  // ==========================================
+  // CART STATE
+  // ==========================================
+  const [cartItems, setCartItems] = useState(() => {
+    try {
+      const savedCart = localStorage.getItem("cartItems");
 
-  // ADD PRODUCT
+      if (!savedCart) {
+        return [];
+      }
+
+      const parsedCart = JSON.parse(savedCart);
+
+      return Array.isArray(parsedCart) ? parsedCart : [];
+    } catch (error) {
+      console.error("Error loading cart:", error);
+      return [];
+    }
+  });
+
+  // ==========================================
+  // SAVE CART TO LOCAL STORAGE
+  // ==========================================
+  useEffect(() => {
+    try {
+      localStorage.setItem("cartItems", JSON.stringify(cartItems));
+    } catch (error) {
+      console.error("Error saving cart:", error);
+    }
+  }, [cartItems]);
+
+  // ==========================================
+  // ADD TO CART
+  // ==========================================
   const addToCart = (product) => {
     setCartItems((currentItems) => {
-      const existingProduct = currentItems.find(
-        (item) => item.id === product.id,
+      const existingItem = currentItems.find(
+        (item) =>
+          Number(item.id) === Number(product.id) &&
+          (item.size || "") === (product.size || "")
       );
 
-      if (existingProduct) {
+      if (existingItem) {
         return currentItems.map((item) =>
-          item.id === product.id
+          Number(item.id) === Number(product.id) &&
+          (item.size || "") === (product.size || "")
             ? {
                 ...item,
-                quantity: item.quantity + 1,
+                quantity: Number(item.quantity || 0) + 1,
               }
-            : item,
+            : item
         );
       }
 
@@ -33,52 +67,86 @@ export const CartProvider = ({ children }) => {
     });
   };
 
-  // REMOVE PRODUCT
-  const removeFromCart = (id) => {
+  // ==========================================
+  // REMOVE FROM CART
+  // ==========================================
+  const removeFromCart = (id, size = "") => {
     setCartItems((currentItems) =>
-      currentItems.filter((item) => item.id !== id),
+      currentItems.filter(
+        (item) =>
+          !(
+            Number(item.id) === Number(id) &&
+            (item.size || "") === size
+          )
+      )
     );
   };
 
+  // ==========================================
   // INCREASE QUANTITY
-  const increaseQuantity = (id) => {
+  // ==========================================
+  const increaseQuantity = (id, size = "") => {
     setCartItems((currentItems) =>
       currentItems.map((item) =>
-        item.id === id
+        Number(item.id) === Number(id) &&
+        (item.size || "") === size
           ? {
               ...item,
-              quantity: item.quantity + 1,
+              quantity: Number(item.quantity || 0) + 1,
             }
-          : item,
-      ),
+          : item
+      )
     );
   };
 
+  // ==========================================
   // DECREASE QUANTITY
-  const decreaseQuantity = (id) => {
+  // ==========================================
+  const decreaseQuantity = (id, size = "") => {
     setCartItems((currentItems) =>
       currentItems
         .map((item) =>
-          item.id === id
+          Number(item.id) === Number(id) &&
+          (item.size || "") === size
             ? {
                 ...item,
-                quantity: item.quantity - 1,
+                quantity: Number(item.quantity || 0) - 1,
               }
-            : item,
+            : item
         )
-        .filter((item) => item.quantity > 0),
+        .filter((item) => Number(item.quantity) > 0)
     );
   };
 
-  // TOTAL NUMBER OF PRODUCTS
-  const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
+  // ==========================================
+  // CLEAR CART
+  // ==========================================
+  const clearCart = () => {
+    setCartItems([]);
+    localStorage.removeItem("cartItems");
+  };
 
-  // SUBTOTAL
-  const totalPrice = cartItems.reduce(
-    (total, item) => total + Number(item.price) * item.quantity,
-    0,
+  // ==========================================
+  // CART COUNT
+  // ==========================================
+  const cartCount = cartItems.reduce(
+    (total, item) => total + Number(item.quantity || 0),
+    0
   );
 
+  // ==========================================
+  // TOTAL PRICE
+  // ==========================================
+  const totalPrice = cartItems.reduce(
+    (total, item) =>
+      total +
+      Number(item.price || 0) * Number(item.quantity || 0),
+    0
+  );
+
+  // ==========================================
+  // PROVIDER
+  // ==========================================
   return (
     <CartContext.Provider
       value={{
@@ -87,6 +155,7 @@ export const CartProvider = ({ children }) => {
         removeFromCart,
         increaseQuantity,
         decreaseQuantity,
+        clearCart,
         cartCount,
         totalPrice,
       }}
@@ -96,6 +165,10 @@ export const CartProvider = ({ children }) => {
   );
 };
 
+// ==========================================
+// USE CART
+// ==========================================
 export const useCart = () => {
   return useContext(CartContext);
 };
+

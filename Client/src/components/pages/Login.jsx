@@ -2,32 +2,30 @@ import { useState } from "react";
 import Navbar from "../common/Navbar";
 import Footer from "../common/Footer";
 import { useNavigate } from "react-router-dom";
-import { login } from "../services/authService.js";
+import { login as loginApi } from "../services/authService.js";
+import { useAuth } from "../context/AuthContext"; // ← add this
 
 const Login = () => {
   const navigate = useNavigate();
+  const { login } = useAuth(); // ← add this
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
-  // CREATE ACCOUNT
   const handleCreateAccount = () => {
     navigate("/Register");
   };
 
-  // LOGIN
   const handleLogin = async (e) => {
     e.preventDefault();
-
     setErrors({});
 
     try {
       setLoading(true);
 
-      const { data } = await login({
+      const { data } = await loginApi({
         email: email.trim(),
         password,
       });
@@ -36,20 +34,14 @@ const Login = () => {
         setErrors({
           general: data.message || "Login failed",
         });
-
         return;
       }
 
-      // Save login information
-      if (data.token) {
-        localStorage.setItem("token", data.token);
+      // ✅ This is the important part
+      if (data.token && data.user) {
+        login(data.user, data.token); // updates both React state + localStorage
       }
 
-      if (data.user) {
-        localStorage.setItem("user", JSON.stringify(data.user));
-      }
-
-      // Login successful
       navigate("/");
     } catch (requestError) {
       console.error("Login Error:", requestError);
@@ -58,11 +50,9 @@ const Login = () => {
 
       if (backendErrors) {
         const formattedErrors = {};
-
         backendErrors.forEach((error) => {
           formattedErrors[error.path] = error.msg;
         });
-
         setErrors(formattedErrors);
       } else {
         setErrors({

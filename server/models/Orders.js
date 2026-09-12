@@ -3,14 +3,13 @@ import pool from "../config/db.js";
 // ========================================
 // GET ACTIVE SHIPPING FEE
 // ========================================
-
 export const getShippingFee = async () => {
   const result = await pool.query(
     `SELECT *
      FROM shipping_fees
      WHERE active = true
      ORDER BY created_at DESC
-     LIMIT 1`,
+     LIMIT 1`
   );
 
   if (result.rows.length === 0) {
@@ -23,40 +22,93 @@ export const getShippingFee = async () => {
 // ========================================
 // CREATE ORDER
 // ========================================
-
 export const CreateOrders = async (
   userId,
   cartItems,
   totalAmount,
   shippingAddress,
-  paymentMethod = "COD",
+  shippingCity,
+  shippingState,
+  shippingCountry,
+  paymentMethod = "COD"
 ) => {
   const client = await pool.connect();
 
   try {
     await client.query("BEGIN");
 
+    // ======================================
+    // CREATE ORDER
+    // ======================================
     const orderResult = await client.query(
       `INSERT INTO orders
-        (user_id, total_amount, shipping_address, payment_method, status, created_at)
+        (
+          user_id,
+          total_amount,
+          shipping_address,
+          shipping_city,
+          shipping_state,
+          shipping_country,
+          payment_method,
+          status,
+          created_at,
+          updated_at
+        )
        VALUES
-        ($1, $2, $3, $4, 'pending', NOW())
+        (
+          $1,
+          $2,
+          $3,
+          $4,
+          $5,
+          $6,
+          $7,
+          'pending',
+          NOW(),
+          NOW()
+        )
        RETURNING *`,
-      [userId, totalAmount, shippingAddress, paymentMethod],
+      [
+        userId,
+        totalAmount,
+        shippingAddress,
+        shippingCity,
+        shippingState,
+        shippingCountry,
+        paymentMethod,
+      ]
     );
 
     const orderId = orderResult.rows[0].id;
 
+    // ======================================
+    // CREATE ORDER ITEMS
+    // ======================================
     for (const item of cartItems) {
       await client.query(
         `INSERT INTO order_items
-          (order_id, product_id, quantity, size, price)
+          (
+            order_id,
+            product_id,
+            quantity,
+            size,
+            price
+          )
          VALUES
           ($1, $2, $3, $4, $5)`,
-        [orderId, item.product_id, item.quantity, item.size, item.price],
+        [
+          orderId,
+          item.product_id,
+          item.quantity,
+          item.size || null,
+          item.price,
+        ]
       );
     }
 
+    // ======================================
+    // COMMIT
+    // ======================================
     await client.query("COMMIT");
 
     return orderResult.rows[0];
@@ -69,26 +121,27 @@ export const CreateOrders = async (
 };
 
 // ========================================
-// GET ALL ORDERS BY USER
+// GET ORDERS BY USER
 // ========================================
-
 export const getOrdersByUserId = async (userId) => {
   const result = await pool.query(
     `SELECT *
      FROM orders
      WHERE user_id = $1
      ORDER BY created_at DESC`,
-    [userId],
+    [userId]
   );
 
   return result.rows;
 };
 
 // ========================================
-// GET ORDER + ITEMS
+// GET SINGLE ORDER
 // ========================================
-
-export const getOrderById = async (orderId, userId = null) => {
+export const getOrderById = async (
+  orderId,
+  userId = null
+) => {
   let query = `
     SELECT *
     FROM orders
@@ -97,12 +150,16 @@ export const getOrderById = async (orderId, userId = null) => {
 
   const params = [orderId];
 
+  // Customer can only view their own order
   if (userId) {
     query += ` AND user_id = $2`;
     params.push(userId);
   }
 
-  const orderResult = await pool.query(query, params);
+  const orderResult = await pool.query(
+    query,
+    params
+  );
 
   if (orderResult.rows.length === 0) {
     return null;
@@ -110,6 +167,9 @@ export const getOrderById = async (orderId, userId = null) => {
 
   const order = orderResult.rows[0];
 
+  // ======================================
+  // GET ORDER ITEMS
+  // ======================================
   const itemsResult = await pool.query(
     `SELECT
        oi.*,
@@ -118,8 +178,9 @@ export const getOrderById = async (orderId, userId = null) => {
      FROM order_items oi
      JOIN products p
        ON oi.product_id = p.id
-     WHERE oi.order_id = $1`,
-    [orderId],
+     WHERE oi.order_id = $1
+     ORDER BY oi.id ASC`,
+    [orderId]
   );
 
   return {
@@ -129,31 +190,38 @@ export const getOrderById = async (orderId, userId = null) => {
 };
 
 // ========================================
-// GET ALL ORDERS (ADMIN)
+// GET ALL ORDERS - ADMIN
 // ========================================
-
 export const getAllOrders = async () => {
   const result = await pool.query(
-    `SELECT o.*, u.name AS user_name, u.email AS user_email
+    `SELECT
+       o.*,
+       u.name AS user_name,
+       u.email AS user_email
      FROM orders o
-     JOIN users u ON o.user_id = u.id
-     ORDER BY o.created_at DESC`,
+     JOIN users u
+       ON o.user_id = u.id
+     ORDER BY o.created_at DESC`
   );
 
   return result.rows;
 };
 
 // ========================================
-// UPDATE ORDER STATUS (ADMIN)
+// UPDATE ORDER STATUS - ADMIN
 // ========================================
-
-export const updateOrderStatus = async (orderId, newStatus) => {
+export const updateOrderStatus = async (
+  orderId,
+  newStatus
+) => {
   const result = await pool.query(
     `UPDATE orders
-     SET status = $1
+     SET
+       status = $1,
+       updated_at = NOW()
      WHERE id = $2
      RETURNING *`,
-    [newStatus, orderId],
+    [newStatus, orderId]
   );
 
   return result.rows[0];

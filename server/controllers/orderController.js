@@ -15,11 +15,25 @@ import { getProductById } from "../models/Product.js";
 // ========================================
 export const placeOrder = async (req, res) => {
   try {
-    const { items, shippingAddress, paymentMethod = "COD" } = req.body;
+    const {
+      items,
+      shippingAddress,
+      paymentMethod = "COD",
+    } = req.body;
 
-    // ========================================
+    // ======================================
+    // CHECK AUTHENTICATION
+    // ======================================
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({
+        success: false,
+        message: "You must be logged in to place an order",
+      });
+    }
+
+    // ======================================
     // CHECK CART
-    // ========================================
+    // ======================================
     if (!Array.isArray(items) || items.length === 0) {
       return res.status(400).json({
         success: false,
@@ -27,38 +41,81 @@ export const placeOrder = async (req, res) => {
       });
     }
 
-    // ========================================
+    // ======================================
     // CHECK SHIPPING ADDRESS
-    // ========================================
-    if (!shippingAddress) {
+    // ======================================
+    if (
+      !shippingAddress ||
+      typeof shippingAddress !== "object"
+    ) {
       return res.status(400).json({
         success: false,
         message: "Shipping address is required",
       });
     }
 
-    // ========================================
+    const {
+      address,
+      city,
+      state,
+      country,
+    } = shippingAddress;
+
+    // ======================================
+    // VALIDATE SHIPPING INFORMATION
+    // ======================================
+    if (!address || !address.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Shipping address is required",
+      });
+    }
+
+    if (!city || !city.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Shipping city is required",
+      });
+    }
+
+    if (!state || !state.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Shipping state is required",
+      });
+    }
+
+    if (!country || !country.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Shipping country is required",
+      });
+    }
+
+    // ======================================
     // CALCULATE SUBTOTAL
-    // ========================================
+    // ======================================
     let subtotal = 0;
+
     const orderItems = [];
 
     for (const item of items) {
-      // Get product from database
-      const product = await getProductById(item.product_id);
+      const productId = Number(item.product_id);
+      const quantity = Number(item.quantity);
 
-      if (!product) {
-        return res.status(404).json({
+      // ====================================
+      // VALIDATE PRODUCT ID
+      // ====================================
+      if (!Number.isInteger(productId) || productId < 1) {
+        return res.status(400).json({
           success: false,
-          message: `Product not found: ${item.product_id}`,
+          message: "Invalid product ID",
         });
       }
 
-      // ========================================
-      // CHECK QUANTITY
-      // ========================================
-      const quantity = Number(item.quantity);
-
+      // ====================================
+      // VALIDATE QUANTITY
+      // ====================================
       if (!Number.isInteger(quantity) || quantity < 1) {
         return res.status(400).json({
           success: false,
@@ -66,19 +123,38 @@ export const placeOrder = async (req, res) => {
         });
       }
 
-      // ========================================
-      // GET PRODUCT PRICE FROM DATABASE
-      // ========================================
+      // ====================================
+      // GET PRODUCT FROM DATABASE
+      // ====================================
+      const product = await getProductById(productId);
+
+      if (!product) {
+        return res.status(404).json({
+          success: false,
+          message: `Product not found: ${productId}`,
+        });
+      }
+
+      // ====================================
+      // GET TRUSTED PRICE
+      // ====================================
       const price = Number(product.price);
 
-      // ========================================
+      if (Number.isNaN(price) || price < 0) {
+        return res.status(500).json({
+          success: false,
+          message: `Invalid price for product: ${productId}`,
+        });
+      }
+
+      // ====================================
       // CALCULATE SUBTOTAL
-      // ========================================
+      // ====================================
       subtotal += price * quantity;
 
-      // ========================================
-      // CREATE TRUSTED ORDER ITEM
-      // ========================================
+      // ====================================
+      // ADD ORDER ITEM
+      // ====================================
       orderItems.push({
         product_id: product.id,
         quantity,
@@ -87,9 +163,9 @@ export const placeOrder = async (req, res) => {
       });
     }
 
-    // ========================================
-    // GET SHIPPING FEE FROM DATABASE
-    // ========================================
+    // ======================================
+    // GET SHIPPING FEE
+    // ======================================
     const shipping = await getShippingFee();
 
     if (!shipping) {
@@ -101,30 +177,40 @@ export const placeOrder = async (req, res) => {
 
     const shippingFee = Number(shipping.amount);
 
-    // ========================================
-    // CALCULATE FINAL TOTAL
-    // ========================================
+    if (Number.isNaN(shippingFee) || shippingFee < 0) {
+      return res.status(500).json({
+        success: false,
+        message: "Invalid shipping fee",
+      });
+    }
+
+    // ======================================
+    // CALCULATE TOTAL
+    // ======================================
     const totalAmount = subtotal + shippingFee;
 
-    // ========================================
+    // ======================================
     // CREATE ORDER
-    // ========================================
+    // ======================================
     const order = await CreateOrders(
       req.user.id,
       orderItems,
       totalAmount,
-      shippingAddress,
-      paymentMethod,
+      address.trim(),
+      city.trim(),
+      state.trim(),
+      country.trim(),
+      paymentMethod
     );
 
-    // ========================================
+    // ======================================
     // CLEAR USER CART
-    // ========================================
+    // ======================================
     await clearCart(req.user.id);
 
-    // ========================================
-    // RESPONSE
-    // ========================================
+    // ======================================
+    // SUCCESS RESPONSE
+    // ======================================
     return res.status(201).json({
       success: true,
       message: "Order placed successfully",
@@ -167,13 +253,16 @@ export const getMyOrders = async (req, res) => {
 };
 
 // ========================================
-// GET SINGLE ORDER
+// GET SINGLE USER ORDER
 // ========================================
 export const getMyOrderById = async (req, res) => {
   try {
     const { orderId } = req.params;
 
-    const order = await getOrderById(orderId, req.user.id);
+    const order = await getOrderById(
+      orderId,
+      req.user.id
+    );
 
     if (!order) {
       return res.status(404).json({
@@ -227,9 +316,9 @@ export const updateOrderStatusAdmin = async (req, res) => {
     const { orderId } = req.params;
     const { status } = req.body;
 
-    // ========================================
+    // ======================================
     // CHECK STATUS
-    // ========================================
+    // ======================================
     if (!status) {
       return res.status(400).json({
         success: false,
@@ -237,15 +326,16 @@ export const updateOrderStatusAdmin = async (req, res) => {
       });
     }
 
-    // ========================================
-    // VALID ORDER STATUSES
-    // ========================================
+    // ======================================
+    // VALID STATUSES
+    // ======================================
     const allowedStatuses = [
       "pending",
       "processing",
       "shipped",
       "delivered",
       "cancelled",
+      "payment_pending",
     ];
 
     if (!allowedStatuses.includes(status)) {
@@ -256,10 +346,13 @@ export const updateOrderStatusAdmin = async (req, res) => {
       });
     }
 
-    // ========================================
+    // ======================================
     // UPDATE ORDER
-    // ========================================
-    const order = await updateOrderStatus(orderId, status);
+    // ======================================
+    const order = await updateOrderStatus(
+      orderId,
+      status
+    );
 
     if (!order) {
       return res.status(404).json({
@@ -274,7 +367,10 @@ export const updateOrderStatusAdmin = async (req, res) => {
       order,
     });
   } catch (error) {
-    console.error("Error updating order status:", error);
+    console.error(
+      "Error updating order status:",
+      error
+    );
 
     return res.status(500).json({
       success: false,
