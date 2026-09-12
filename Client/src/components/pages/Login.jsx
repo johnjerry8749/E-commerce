@@ -191,7 +191,7 @@ const Login = () => {
                   fontSize: "20px",
                 }}
               >
-                {loading ? "Signing In..." : "Sign In"}
+                {loading ? "Loading..." : "Sign In"}
               </button>
             </div>
           </form>
