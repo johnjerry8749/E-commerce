@@ -38,6 +38,6 @@ router.use("/admin", adminRouter);
 //=========================
 //USER ROUTES
 //=======================
-router.use("/users", userRouter);
+router.use("/", userRouter);
 
 export default router;
