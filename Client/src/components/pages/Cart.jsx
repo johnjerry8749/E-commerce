@@ -162,7 +162,7 @@ const Cart = () => {
                         <button
                           type="button"
                           className="btn p-0 border-0"
-                          onClick={() => removeFromCart(item.id)}
+                         onClick={() => { console.log("Removing cart item:", item); removeFromCart(item.id, item.size || ""); }}
                         >
                           <i
                             className="ti ti-trash"
