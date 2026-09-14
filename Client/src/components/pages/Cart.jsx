@@ -17,7 +17,7 @@ const Cart = () => {
   // =========================
   // SHIPPING FEE
   // =========================
-  const shippingFee = cartItems.length > 0 ? 10 : 0;
+  const shippingFee = cartItems.length > 0 ? 3500 : 0;
   const total = totalPrice + shippingFee;
 
   // =========================
