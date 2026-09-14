@@ -648,7 +648,7 @@ const Checkout = () => {
                         </div>
 
                         <p className="mb-0 mt-1">
-                          $ {Number(item.price).toFixed(2)}
+                          ₦ {Number(item.price).toFixed(2)}
                         </p>
                       </div>
                     </div>
@@ -665,7 +665,7 @@ const Checkout = () => {
                   </span>
 
                   <span>
-                    $ {Number(totalPrice).toFixed(2)}
+                    ₦ {Number(totalPrice).toFixed(2)}
                   </span>
                 </div>
 
@@ -675,7 +675,7 @@ const Checkout = () => {
                   </span>
 
                   <span>
-                    $ {shippingFee.toFixed(2)}
+                    ₦ {shippingFee.toFixed(2)}
                   </span>
                 </div>
 
@@ -685,7 +685,7 @@ const Checkout = () => {
                   </span>
 
                   <span className="fw-bold fs-5">
-                    $ {total.toFixed(2)}
+                    ₦ {total.toFixed(2)}
                   </span>
                 </div>
 

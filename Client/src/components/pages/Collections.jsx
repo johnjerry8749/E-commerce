@@ -425,7 +425,7 @@ const Collections = () => {
                       <p className="product-name">{product.name}</p>
 
                       <p className="product-price">
-                        ${Number(product.price || 0).toFixed(2)}
+                        ₦{Number(product.price || 0).toFixed(2)}
                       </p>
                     </div>
                   </div>
@@ -613,7 +613,7 @@ const Collections = () => {
                         <p className="product-name">{product.name}</p>
 
                         <p className="product-price">
-                          ${Number(product.price || 0).toFixed(2)}
+                          ₦{Number(product.price || 0).toFixed(2)}
                         </p>
                       </div>
                     </div>

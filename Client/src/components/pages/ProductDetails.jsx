@@ -351,7 +351,7 @@ const ProductDetails = () => {
               {/* PRICE */}
               <div className="mb-3">
                 <span className="fs-2 fw-bold">
-                  ${Number(product.price || 0).toFixed(2)}
+                  ₦{Number(product.price || 0).toFixed(2)}
                 </span>
               </div>
 
@@ -497,7 +497,7 @@ const ProductDetails = () => {
                   <small className="text-muted">Price</small>
 
                   <p className="fw-semibold mb-0">
-                    ${Number(product.price || 0).toFixed(2)}
+                    ₦{Number(product.price || 0).toFixed(2)}
                   </p>
                 </div>
 

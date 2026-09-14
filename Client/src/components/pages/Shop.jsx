@@ -349,7 +349,7 @@ const Shop = () => {
                       <div className="px-2 pb-3 pt-1">
                         <p className="product-name-shop">{product.name}</p>
 
-                        <p className="product-price-shop">${product.price}</p>
+                        <p className="product-price-shop">₦{product.price}</p>
                       </div>
                     </div>
                   </div>
@@ -412,8 +412,7 @@ const Shop = () => {
                           src={
                             product.mainImage ||
                             product.main_image ||
-                            product.image1 ||
-                            Productimg2
+                            product.image1 
                           }
                           alt={product.name}
                           className="product-img-shop"
@@ -423,7 +422,7 @@ const Shop = () => {
                       <div className="px-2 pb-3 pt-1">
                         <p className="product-name-shop">{product.name}</p>
 
-                        <p className="product-price-shop">${product.price}</p>
+                        <p className="product-price-shop">₦{product.price}</p>
                       </div>
                     </div>
                   </div>

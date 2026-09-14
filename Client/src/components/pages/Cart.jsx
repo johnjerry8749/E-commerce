@@ -107,7 +107,7 @@ const Cart = () => {
                         <div className="d-flex align-items-center gap-3 flex-wrap">
                           {/* PRICE */}
                           <p className="mb-0 fs-6">
-                            $ {Number(item.price).toFixed(2)}
+                            ₦ {Number(item.price).toFixed(2)}
                           </p>
 
                           {/* SIZE */}
@@ -205,21 +205,21 @@ const Cart = () => {
               <div className="d-flex justify-content-between align-items-center border-bottom py-3">
                 <p className="mb-0 fs-5">Subtotal</p>
 
-                <p className="mb-0 fs-5">$ {totalPrice.toFixed(2)}</p>
+                <p className="mb-0 fs-5">₦ {totalPrice.toFixed(2)}</p>
               </div>
 
               {/* SHIPPING */}
               <div className="d-flex justify-content-between align-items-center border-bottom py-3">
                 <p className="mb-0 fs-5">Shipping Fee</p>
 
-                <p className="mb-0 fs-5">$ {shippingFee.toFixed(2)}</p>
+                <p className="mb-0 fs-5">₦ {shippingFee.toFixed(2)}</p>
               </div>
 
               {/* TOTAL */}
               <div className="d-flex justify-content-between align-items-center py-3">
                 <p className="mb-0 fs-5 fw-bold">Total</p>
 
-                <p className="mb-0 fs-5 fw-bold">$ {total.toFixed(2)}</p>
+                <p className="mb-0 fs-5 fw-bold">₦ {total.toFixed(2)}</p>
               </div>
 
               {/* CHECKOUT BUTTON */}
