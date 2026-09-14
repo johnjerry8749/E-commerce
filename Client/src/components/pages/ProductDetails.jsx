@@ -454,7 +454,7 @@ const ProductDetails = () => {
                     <h6 className="fw-semibold mb-1">Free Delivery</h6>
 
                     <small className="text-muted">
-                      Free delivery on orders over $50
+                      Free delivery on orders over ₦3500
                     </small>
                   </div>
                 </div>
