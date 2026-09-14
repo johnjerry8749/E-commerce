@@ -12,11 +12,7 @@ export const getShippingFee = async () => {
      LIMIT 1`
   );
 
-  if (result.rows.length === 0) {
-    return null;
-  }
-
-  return result.rows[0];
+  return result.rows[0] || null;
 };
 
 // ========================================
@@ -25,6 +21,7 @@ export const getShippingFee = async () => {
 export const CreateOrders = async (
   userId,
   cartItems,
+  phonenumber,
   totalAmount,
   shippingAddress,
   shippingCity,
@@ -45,6 +42,7 @@ export const CreateOrders = async (
         (
           user_id,
           total_amount,
+          phone_number,
           shipping_address,
           shipping_city,
           shipping_state,
@@ -63,6 +61,7 @@ export const CreateOrders = async (
           $5,
           $6,
           $7,
+          $8,
           'pending',
           NOW(),
           NOW()
@@ -71,6 +70,7 @@ export const CreateOrders = async (
       [
         userId,
         totalAmount,
+        phonenumber,
         shippingAddress,
         shippingCity,
         shippingState,
@@ -143,16 +143,23 @@ export const getOrderById = async (
   userId = null
 ) => {
   let query = `
-    SELECT *
-    FROM orders
-    WHERE id = $1
+    SELECT
+      o.*,
+      u.name AS user_name,
+      u.email AS user_email
+    FROM orders o
+    LEFT JOIN users u
+      ON o.user_id = u.id
+    WHERE o.id = $1
   `;
 
   const params = [orderId];
 
-  // Customer can only view their own order
+  // ======================================
+  // CUSTOMER CAN ONLY VIEW THEIR OWN ORDER
+  // ======================================
   if (userId) {
-    query += ` AND user_id = $2`;
+    query += ` AND o.user_id = $2`;
     params.push(userId);
   }
 
@@ -168,17 +175,30 @@ export const getOrderById = async (
   const order = orderResult.rows[0];
 
   // ======================================
-  // GET ORDER ITEMS
+  // GET ORDER ITEMS + PRODUCT INFORMATION
   // ======================================
   const itemsResult = await pool.query(
     `SELECT
-       oi.*,
+       oi.id,
+       oi.order_id,
+       oi.product_id,
+       oi.quantity,
+       oi.size,
+       oi.price,
+
        p.name AS product_name,
-       p.main_image AS product_main_image
+       p.main_image AS main_image,
+       p.description AS product_description,
+       p.category AS product_category,
+       p.subcategory AS product_subcategory
+
      FROM order_items oi
-     JOIN products p
+
+     LEFT JOIN products p
        ON oi.product_id = p.id
+
      WHERE oi.order_id = $1
+
      ORDER BY oi.id ASC`,
     [orderId]
   );
@@ -199,7 +219,7 @@ export const getAllOrders = async () => {
        u.name AS user_name,
        u.email AS user_email
      FROM orders o
-     JOIN users u
+     LEFT JOIN users u
        ON o.user_id = u.id
      ORDER BY o.created_at DESC`
   );
@@ -224,5 +244,6 @@ export const updateOrderStatus = async (
     [newStatus, orderId]
   );
 
-  return result.rows[0];
+  return result.rows[0] || null;
 };
+

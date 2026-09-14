@@ -17,6 +17,7 @@ export const placeOrder = async (req, res) => {
   try {
     const {
       items,
+      phone,
       shippingAddress,
       paymentMethod = "COD",
     } = req.body;
@@ -24,7 +25,7 @@ export const placeOrder = async (req, res) => {
     // ======================================
     // CHECK AUTHENTICATION
     // ======================================
-    if (!req.user || !req.user.id) {
+    if (!req.user?.id) {
       return res.status(401).json({
         success: false,
         message: "You must be logged in to place an order",
@@ -37,7 +38,20 @@ export const placeOrder = async (req, res) => {
     if (!Array.isArray(items) || items.length === 0) {
       return res.status(400).json({
         success: false,
-        message: "Cart is empty",
+        message: "Cannot place an order because your cart is empty",
+      });
+    }
+
+    // ======================================
+    // CHECK PHONE
+    // ======================================
+    if (
+      typeof phone !== "string" ||
+      !phone.trim()
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Phone number is required",
       });
     }
 
@@ -62,30 +76,42 @@ export const placeOrder = async (req, res) => {
     } = shippingAddress;
 
     // ======================================
-    // VALIDATE SHIPPING INFORMATION
+    // VALIDATE SHIPPING ADDRESS
     // ======================================
-    if (!address || !address.trim()) {
+    if (
+      typeof address !== "string" ||
+      !address.trim()
+    ) {
       return res.status(400).json({
         success: false,
         message: "Shipping address is required",
       });
     }
 
-    if (!city || !city.trim()) {
+    if (
+      typeof city !== "string" ||
+      !city.trim()
+    ) {
       return res.status(400).json({
         success: false,
         message: "Shipping city is required",
       });
     }
 
-    if (!state || !state.trim()) {
+    if (
+      typeof state !== "string" ||
+      !state.trim()
+    ) {
       return res.status(400).json({
         success: false,
         message: "Shipping state is required",
       });
     }
 
-    if (!country || !country.trim()) {
+    if (
+      typeof country !== "string" ||
+      !country.trim()
+    ) {
       return res.status(400).json({
         success: false,
         message: "Shipping country is required",
@@ -93,20 +119,44 @@ export const placeOrder = async (req, res) => {
     }
 
     // ======================================
+    // VALIDATE PAYMENT METHOD
+    // ======================================
+    const allowedPaymentMethods = [
+      "COD",
+      "credit_card",
+      "debit_card",
+      "paypal",
+      "paystack",
+    ];
+
+    if (!allowedPaymentMethods.includes(paymentMethod)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid payment method",
+        allowedPaymentMethods,
+      });
+    }
+
+    // ======================================
     // CALCULATE SUBTOTAL
     // ======================================
     let subtotal = 0;
-
     const orderItems = [];
 
     for (const item of items) {
-      const productId = Number(item.product_id);
+      const productId = Number(
+        item.product_id || item.id
+      );
+
       const quantity = Number(item.quantity);
 
       // ====================================
       // VALIDATE PRODUCT ID
       // ====================================
-      if (!Number.isInteger(productId) || productId < 1) {
+      if (
+        !Number.isInteger(productId) ||
+        productId < 1
+      ) {
         return res.status(400).json({
           success: false,
           message: "Invalid product ID",
@@ -116,10 +166,13 @@ export const placeOrder = async (req, res) => {
       // ====================================
       // VALIDATE QUANTITY
       // ====================================
-      if (!Number.isInteger(quantity) || quantity < 1) {
+      if (
+        !Number.isInteger(quantity) ||
+        quantity < 1
+      ) {
         return res.status(400).json({
           success: false,
-          message: "Invalid product quantity",
+          message: `Invalid quantity for product ${productId}`,
         });
       }
 
@@ -136,11 +189,14 @@ export const placeOrder = async (req, res) => {
       }
 
       // ====================================
-      // GET TRUSTED PRICE
+      // GET TRUSTED PRODUCT PRICE
       // ====================================
       const price = Number(product.price);
 
-      if (Number.isNaN(price) || price < 0) {
+      if (
+        !Number.isFinite(price) ||
+        price < 0
+      ) {
         return res.status(500).json({
           success: false,
           message: `Invalid price for product: ${productId}`,
@@ -164,7 +220,7 @@ export const placeOrder = async (req, res) => {
     }
 
     // ======================================
-    // GET SHIPPING FEE
+    // GET ACTIVE SHIPPING FEE
     // ======================================
     const shipping = await getShippingFee();
 
@@ -177,7 +233,10 @@ export const placeOrder = async (req, res) => {
 
     const shippingFee = Number(shipping.amount);
 
-    if (Number.isNaN(shippingFee) || shippingFee < 0) {
+    if (
+      !Number.isFinite(shippingFee) ||
+      shippingFee < 0
+    ) {
       return res.status(500).json({
         success: false,
         message: "Invalid shipping fee",
@@ -185,7 +244,7 @@ export const placeOrder = async (req, res) => {
     }
 
     // ======================================
-    // CALCULATE TOTAL
+    // CALCULATE FINAL TOTAL
     // ======================================
     const totalAmount = subtotal + shippingFee;
 
@@ -195,6 +254,7 @@ export const placeOrder = async (req, res) => {
     const order = await CreateOrders(
       req.user.id,
       orderItems,
+      phone.trim(),
       totalAmount,
       address.trim(),
       city.trim(),
@@ -204,12 +264,12 @@ export const placeOrder = async (req, res) => {
     );
 
     // ======================================
-    // CLEAR USER CART
+    // CLEAR CART AFTER SUCCESSFUL ORDER
     // ======================================
     await clearCart(req.user.id);
 
     // ======================================
-    // SUCCESS RESPONSE
+    // SUCCESS
     // ======================================
     return res.status(201).json({
       success: true,
@@ -317,16 +377,6 @@ export const updateOrderStatusAdmin = async (req, res) => {
     const { status } = req.body;
 
     // ======================================
-    // CHECK STATUS
-    // ======================================
-    if (!status) {
-      return res.status(400).json({
-        success: false,
-        message: "Order status is required",
-      });
-    }
-
-    // ======================================
     // VALID STATUSES
     // ======================================
     const allowedStatuses = [
@@ -338,6 +388,13 @@ export const updateOrderStatusAdmin = async (req, res) => {
       "payment_pending",
     ];
 
+    if (!status) {
+      return res.status(400).json({
+        success: false,
+        message: "Order status is required",
+      });
+    }
+
     if (!allowedStatuses.includes(status)) {
       return res.status(400).json({
         success: false,
@@ -347,7 +404,7 @@ export const updateOrderStatusAdmin = async (req, res) => {
     }
 
     // ======================================
-    // UPDATE ORDER
+    // UPDATE ORDER STATUS
     // ======================================
     const order = await updateOrderStatus(
       orderId,

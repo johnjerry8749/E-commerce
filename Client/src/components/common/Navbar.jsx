@@ -2,6 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import Logo from "../../assets/front/logo.png";
 import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
 
 import cart_icon from "../../assets/front/cart_icon.png";
 import user_icon from "../../assets/front/profile_icon.png";
@@ -9,6 +10,7 @@ import search_icon from "../../assets/front/search_icon.png";
 import menu_icon from "../../assets/front/menu_icon.png";
 
 const Navbar = () => {
+  const { logout } = useAuth();
   const { cartCount } = useCart();
   const navigate = useNavigate();
 
@@ -43,6 +45,11 @@ const Navbar = () => {
       navigate("/Login");
     }
   };
+  const handleLogout = () => {
+  logout();
+  setUser(null);
+  navigate("/Login");
+};
 
   return (
     <>
@@ -341,13 +348,13 @@ const Navbar = () => {
                   toggleMenu();
 
                   if (user) {
-                    navigate("/Profile");
+                    handleLogout();;
                   } else {
                     navigate("/Login");
                   }
                 }}
               >
-                {user ? "Profile" : "Login"}
+                {user ? "Logout" : "Login"}
               </button>
             </div>
           </div>

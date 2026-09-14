@@ -40,13 +40,13 @@ router.post("/", placeOrder);
 
 // Get all orders
 // GET /api/orders
-router.get("/", adminMiddleware, getAllOrdersAdmin);
+router.get("/", adminMiddleware, protect, getAllOrdersAdmin);
 
 // Update order status
 // PUT /api/orders/:orderId/status
 router.put(
   "/:orderId/status",
-  adminMiddleware,
+ protect, adminMiddleware,  
   updateOrderStatusAdmin
 );
 

@@ -76,6 +76,7 @@ CREATE TABLE orders (
   id SERIAL PRIMARY KEY,
   user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   total_amount DECIMAL(10, 2) NOT NULL CHECK (total_amount >= 0),
+  phone_number TEXT NOT NULL
   shipping_address TEXT NOT NULL,
   shipping_city TEXT NOT NULL,
   shipping_state TEXT NOT NULL,
